@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { useCartStore } from "@/lib/store";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { Payment } from "./payment";
 import type { InsertOrder } from "@shared/schema";
 
 interface CartProps {
@@ -20,6 +21,7 @@ interface CartProps {
 export function Cart({ isOpen, onClose }: CartProps) {
   const { items, updateQuantity, removeItem, clearCart, getTotalPrice } = useCartStore();
   const [showCheckout, setShowCheckout] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
   const [customerInfo, setCustomerInfo] = useState({
     customerName: "",
     customerEmail: "",
@@ -82,14 +84,19 @@ export function Cart({ isOpen, onClose }: CartProps) {
       return;
     }
 
-    const orderData: InsertOrder = {
-      ...customerInfo,
-      items: JSON.stringify(items),
-      total: getTotalPrice().toString(),
-      status: "pending",
-    };
+    setShowPayment(true);
+  };
 
-    orderMutation.mutate(orderData);
+  const handlePaymentSuccess = () => {
+    clearCart();
+    setShowCheckout(false);
+    setShowPayment(false);
+    setCustomerInfo({ customerName: "", customerEmail: "", customerPhone: "" });
+    onClose();
+  };
+
+  const handlePaymentCancel = () => {
+    setShowPayment(false);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -98,6 +105,31 @@ export function Cart({ isOpen, onClose }: CartProps) {
       [e.target.name]: e.target.value
     }));
   };
+
+  if (showPayment) {
+    return (
+      <Sheet open={isOpen} onOpenChange={onClose}>
+        <SheetContent className="w-full sm:max-w-lg">
+          <SheetHeader>
+            <SheetTitle className="flex items-center gap-2">
+              <ShoppingBag className="w-5 h-5" />
+              Payment
+            </SheetTitle>
+          </SheetHeader>
+          
+          <div className="mt-6">
+            <Payment
+              items={items}
+              total={getTotalPrice()}
+              customerInfo={customerInfo}
+              onSuccess={handlePaymentSuccess}
+              onCancel={handlePaymentCancel}
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
 
   if (showCheckout) {
     return (
