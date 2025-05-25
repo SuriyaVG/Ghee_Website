@@ -1,0 +1,137 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;500;600&display=swap');
+
+:root {
+  --background: 45 100% 97%; /* #FFF8E7 cream background */
+  --foreground: 25 42% 12%; /* #2C1810 deep brown */
+  --muted: 45 100% 95%; /* lighter cream */
+  --muted-foreground: 25 20% 45%; /* muted brown */
+  --popover: 0 0% 100%; /* white */
+  --popover-foreground: 25 42% 12%; /* #2C1810 deep brown */
+  --card: 0 0% 100%; /* white */
+  --card-foreground: 25 42% 12%; /* #2C1810 deep brown */
+  --border: 39 30% 80%; /* warm border */
+  --input: 39 30% 80%; /* warm border */
+  --primary: 39 30% 61%; /* #C5A572 warm gold */
+  --primary-foreground: 0 0% 100%; /* white */
+  --secondary: 45 100% 95%; /* light cream */
+  --secondary-foreground: 25 42% 12%; /* #2C1810 deep brown */
+  --accent: 39 100% 65%; /* #FFB74D butter yellow */
+  --accent-foreground: 25 42% 12%; /* #2C1810 deep brown */
+  --destructive: 0 84% 60%; /* red */
+  --destructive-foreground: 0 0% 98%; /* white */
+  --ring: 39 30% 61%; /* #C5A572 warm gold */
+  --radius: 0.5rem;
+  
+  /* Custom GSR colors */
+  --warm-gold: 39 30% 61%; /* #C5A572 */
+  --rich-brown: 25 55% 31%; /* #8B4513 */
+  --cream-bg: 45 100% 97%; /* #FFF8E7 */
+  --deep-brown: 25 42% 12%; /* #2C1810 */
+  --butter-yellow: 39 100% 65%; /* #FFB74D */
+}
+
+.dark {
+  --background: 25 42% 12%; /* #2C1810 deep brown */
+  --foreground: 45 100% 97%; /* #FFF8E7 cream */
+  --muted: 25 30% 20%; /* darker brown */
+  --muted-foreground: 45 80% 80%; /* light cream */
+  --popover: 25 42% 12%; /* #2C1810 deep brown */
+  --popover-foreground: 45 100% 97%; /* #FFF8E7 cream */
+  --card: 25 42% 12%; /* #2C1810 deep brown */
+  --card-foreground: 45 100% 97%; /* #FFF8E7 cream */
+  --border: 25 30% 25%; /* dark brown border */
+  --input: 25 30% 25%; /* dark brown border */
+  --primary: 39 30% 61%; /* #C5A572 warm gold */
+  --primary-foreground: 0 0% 100%; /* white */
+  --secondary: 25 30% 20%; /* darker brown */
+  --secondary-foreground: 45 100% 97%; /* #FFF8E7 cream */
+  --accent: 39 100% 65%; /* #FFB74D butter yellow */
+  --accent-foreground: 25 42% 12%; /* #2C1810 deep brown */
+  --destructive: 0 62% 30%; /* dark red */
+  --destructive-foreground: 0 0% 98%; /* white */
+  --ring: 39 30% 61%; /* #C5A572 warm gold */
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Lato', sans-serif;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+  }
+}
+
+@layer utilities {
+  .font-playfair {
+    font-family: 'Playfair Display', serif;
+  }
+  
+  .font-lato {
+    font-family: 'Lato', sans-serif;
+  }
+  
+  .text-warm-gold {
+    color: hsl(var(--warm-gold));
+  }
+  
+  .text-rich-brown {
+    color: hsl(var(--rich-brown));
+  }
+  
+  .text-deep-brown {
+    color: hsl(var(--deep-brown));
+  }
+  
+  .text-butter-yellow {
+    color: hsl(var(--butter-yellow));
+  }
+  
+  .bg-warm-gold {
+    background-color: hsl(var(--warm-gold));
+  }
+  
+  .bg-rich-brown {
+    background-color: hsl(var(--rich-brown));
+  }
+  
+  .bg-cream-bg {
+    background-color: hsl(var(--cream-bg));
+  }
+  
+  .bg-deep-brown {
+    background-color: hsl(var(--deep-brown));
+  }
+  
+  .bg-butter-yellow {
+    background-color: hsl(var(--butter-yellow));
+  }
+  
+  .border-warm-gold {
+    border-color: hsl(var(--warm-gold));
+  }
+  
+  .border-rich-brown {
+    border-color: hsl(var(--rich-brown));
+  }
+  
+  .hover\:bg-warm-gold:hover {
+    background-color: hsl(var(--warm-gold));
+  }
+  
+  .hover\:bg-rich-brown:hover {
+    background-color: hsl(var(--rich-brown));
+  }
+  
+  .hover\:text-warm-gold:hover {
+    color: hsl(var(--warm-gold));
+  }
+}
