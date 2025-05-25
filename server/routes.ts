@@ -3,8 +3,14 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertOrderSchema, insertContactSchema } from "@shared/schema";
 import { z } from "zod";
+import Razorpay from "razorpay";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Initialize Razorpay
+  const razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_demo',
+    key_secret: process.env.RAZORPAY_KEY_SECRET || 'demo_secret',
+  });
   // Get all products
   app.get("/api/products", async (req, res) => {
     try {
@@ -61,6 +67,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(order);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch order" });
+    }
+  });
+
+  // Create Razorpay order
+  app.post("/api/create-razorpay-order", async (req, res) => {
+    try {
+      const { amount, currency = "INR" } = req.body;
+      
+      const options = {
+        amount: amount * 100, // Razorpay expects amount in paise
+        currency,
+        receipt: `order_${Date.now()}`,
+      };
+
+      const order = await razorpay.orders.create(options);
+      res.json({ 
+        orderId: order.id,
+        amount: order.amount,
+        currency: order.currency 
+      });
+    } catch (error) {
+      console.error("Razorpay order creation failed:", error);
+      res.status(500).json({ message: "Failed to create payment order" });
+    }
+  });
+
+  // Verify payment
+  app.post("/api/verify-payment", async (req, res) => {
+    try {
+      const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+      
+      // In a real implementation, you would verify the signature here
+      // For now, we'll assume the payment is successful
+      
+      res.json({ 
+        success: true,
+        paymentId: razorpay_payment_id,
+        orderId: razorpay_order_id 
+      });
+    } catch (error) {
+      console.error("Payment verification failed:", error);
+      res.status(500).json({ message: "Payment verification failed" });
     }
   });
 

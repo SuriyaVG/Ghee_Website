@@ -21,6 +21,9 @@ export const orders = pgTable("orders", {
   items: text("items").notNull(), // JSON string of cart items
   total: decimal("total", { precision: 10, scale: 2 }).notNull(),
   status: text("status").notNull().default("pending"),
+  paymentId: text("payment_id"),
+  paymentStatus: text("payment_status").default("pending"),
+  razorpayOrderId: text("razorpay_order_id"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
