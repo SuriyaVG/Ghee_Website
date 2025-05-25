@@ -4,6 +4,38 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;500;600&display=swap');
 
 :root {
+  /* Modern Blue Theme */
+  --background: 210 40% 98%; /* #F8FAFC light blue-gray */
+  --foreground: 222 84% 15%; /* #1E293B dark slate */
+  --muted: 210 40% 96%; /* lighter blue-gray */
+  --muted-foreground: 215 16% 47%; /* muted slate */
+  --popover: 0 0% 100%; /* white */
+  --popover-foreground: 222 84% 15%; /* #1E293B dark slate */
+  --card: 0 0% 100%; /* white */
+  --card-foreground: 222 84% 15%; /* #1E293B dark slate */
+  --border: 214 32% 91%; /* light blue border */
+  --input: 214 32% 91%; /* light blue border */
+  --primary: 221 83% 53%; /* #3B82F6 blue */
+  --primary-foreground: 0 0% 100%; /* white */
+  --secondary: 210 40% 96%; /* light blue-gray */
+  --secondary-foreground: 222 84% 15%; /* dark slate */
+  --accent: 217 91% 60%; /* #60A5FA light blue */
+  --accent-foreground: 222 84% 15%; /* dark slate */
+  --destructive: 0 84% 60%; /* red */
+  --destructive-foreground: 0 0% 98%; /* white */
+  --ring: 221 83% 53%; /* #3B82F6 blue */
+  --radius: 0.5rem;
+  
+  /* Custom GSR colors - Blue Theme */
+  --primary-blue: 221 83% 53%; /* #3B82F6 */
+  --secondary-blue: 217 91% 60%; /* #60A5FA */
+  --dark-slate: 222 84% 15%; /* #1E293B */
+  --light-bg: 210 40% 98%; /* #F8FAFC */
+  --accent-cyan: 199 89% 48%; /* #0EA5E9 */
+}
+
+/* Alternative: Original Heritage Theme */
+.heritage-theme {
   --background: 45 100% 97%; /* #FFF8E7 cream background */
   --foreground: 25 42% 12%; /* #2C1810 deep brown */
   --muted: 45 100% 95%; /* lighter cream */
@@ -23,7 +55,6 @@
   --destructive: 0 84% 60%; /* red */
   --destructive-foreground: 0 0% 98%; /* white */
   --ring: 39 30% 61%; /* #C5A572 warm gold */
-  --radius: 0.5rem;
   
   /* Custom GSR colors */
   --warm-gold: 39 30% 61%; /* #C5A572 */
@@ -79,6 +110,64 @@
     font-family: 'Lato', sans-serif;
   }
   
+  /* Blue Theme Utilities */
+  .text-primary-blue {
+    color: hsl(var(--primary-blue));
+  }
+  
+  .text-secondary-blue {
+    color: hsl(var(--secondary-blue));
+  }
+  
+  .text-dark-slate {
+    color: hsl(var(--dark-slate));
+  }
+  
+  .text-accent-cyan {
+    color: hsl(var(--accent-cyan));
+  }
+  
+  .bg-primary-blue {
+    background-color: hsl(var(--primary-blue));
+  }
+  
+  .bg-secondary-blue {
+    background-color: hsl(var(--secondary-blue));
+  }
+  
+  .bg-dark-slate {
+    background-color: hsl(var(--dark-slate));
+  }
+  
+  .bg-light-bg {
+    background-color: hsl(var(--light-bg));
+  }
+  
+  .bg-accent-cyan {
+    background-color: hsl(var(--accent-cyan));
+  }
+  
+  .border-primary-blue {
+    border-color: hsl(var(--primary-blue));
+  }
+  
+  .border-secondary-blue {
+    border-color: hsl(var(--secondary-blue));
+  }
+  
+  .hover\:bg-primary-blue:hover {
+    background-color: hsl(var(--primary-blue));
+  }
+  
+  .hover\:bg-secondary-blue:hover {
+    background-color: hsl(var(--secondary-blue));
+  }
+  
+  .hover\:text-primary-blue:hover {
+    color: hsl(var(--primary-blue));
+  }
+
+  /* Heritage Theme Utilities (for switching back) */
   .text-warm-gold {
     color: hsl(var(--warm-gold));
   }
