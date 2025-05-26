@@ -30,9 +30,9 @@ export function Payment({ items, total, customerInfo, onSuccess, onCancel }: Pay
     },
   });
 
-  const createRazorpayOrderMutation = useMutation({
-    mutationFn: async (amount: number) => {
-      const response = await apiRequest("POST", "/api/create-razorpay-order", { amount });
+  const createCashfreeOrderMutation = useMutation({
+    mutationFn: async ({ amount, customerInfo }: { amount: number; customerInfo: any }) => {
+      const response = await apiRequest("POST", "/api/create-cashfree-order", { amount, customerInfo });
       return response.json();
     },
   });
@@ -41,36 +41,44 @@ export function Payment({ items, total, customerInfo, onSuccess, onCancel }: Pay
     setIsProcessing(true);
     
     try {
-      // Create Razorpay order
-      const razorpayOrder = await createRazorpayOrderMutation.mutateAsync(total);
+      // Create Cashfree order
+      const cashfreeOrder = await createCashfreeOrderMutation.mutateAsync({ 
+        amount: total, 
+        customerInfo 
+      });
       
-      // Configure Razorpay options
-      const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_demo',
-        amount: razorpayOrder.amount,
-        currency: razorpayOrder.currency,
-        name: 'GSR Heritage Ghee',
-        description: 'Premium Pure Ghee Order',
-        order_id: razorpayOrder.orderId,
-        prefill: {
-          name: customerInfo.customerName,
-          email: customerInfo.customerEmail,
-          contact: customerInfo.customerPhone,
-        },
-        theme: {
-          color: '#3B82F6',
-        },
-        handler: async function (response: any) {
+      // Configure Cashfree options
+      const cashfree = new (window as any).Cashfree({
+        mode: import.meta.env.VITE_CASHFREE_ENV || 'sandbox'
+      });
+
+      const checkoutOptions = {
+        paymentSessionId: cashfreeOrder.paymentSessionId,
+        returnUrl: window.location.origin + '/payment-success'
+      };
+
+      cashfree.checkout(checkoutOptions).then(async (result: any) => {
+        if (result.error) {
+          setIsProcessing(false);
+          toast({
+            title: "Payment failed",
+            description: result.error.message || "Payment could not be processed.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        if (result.redirect) {
+          // Handle successful payment
           try {
-            // Create order in database with payment details
             const orderData = {
               ...customerInfo,
               items: JSON.stringify(items),
               total: total.toString(),
               status: 'paid',
-              paymentId: response.razorpay_payment_id,
+              paymentId: result.paymentDetails?.paymentId,
               paymentStatus: 'completed',
-              razorpayOrderId: response.razorpay_order_id,
+              razorpayOrderId: cashfreeOrder.orderId,
             };
 
             await createOrderMutation.mutateAsync(orderData);
@@ -88,22 +96,8 @@ export function Payment({ items, total, customerInfo, onSuccess, onCancel }: Pay
               variant: "destructive",
             });
           }
-        },
-        modal: {
-          ondismiss: function() {
-            setIsProcessing(false);
-            toast({
-              title: "Payment cancelled",
-              description: "Your payment was cancelled. You can try again.",
-              variant: "destructive",
-            });
-          }
         }
-      };
-
-      // Open Razorpay checkout
-      const razorpay = new (window as any).Razorpay(options);
-      razorpay.open();
+      });
       
     } catch (error) {
       setIsProcessing(false);
@@ -197,7 +191,7 @@ export function Payment({ items, total, customerInfo, onSuccess, onCancel }: Pay
             </div>
             <div className="flex items-center gap-2 mt-3 text-xs text-muted-foreground">
               <Lock className="w-3 h-3" />
-              <span>Secured by Razorpay</span>
+              <span>Secured by Cashfree</span>
             </div>
           </CardContent>
         </Card>
