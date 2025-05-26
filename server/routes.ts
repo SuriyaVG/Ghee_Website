@@ -3,14 +3,17 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertOrderSchema, insertContactSchema } from "@shared/schema";
 import { z } from "zod";
-import Razorpay from "razorpay";
+import axios from "axios";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Initialize Razorpay
-  const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_demo',
-    key_secret: process.env.RAZORPAY_KEY_SECRET || 'demo_secret',
-  });
+  // Cashfree configuration
+  const cashfreeConfig = {
+    appId: process.env.CASHFREE_APP_ID || 'demo_app_id',
+    secretKey: process.env.CASHFREE_SECRET_KEY || 'demo_secret',
+    baseUrl: process.env.CASHFREE_ENV === 'production' 
+      ? 'https://api.cashfree.com' 
+      : 'https://sandbox.cashfree.com'
+  };
   // Get all products
   app.get("/api/products", async (req, res) => {
     try {
@@ -70,44 +73,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create Razorpay order
-  app.post("/api/create-razorpay-order", async (req, res) => {
+  // Create Cashfree order
+  app.post("/api/create-cashfree-order", async (req, res) => {
     try {
-      const { amount, currency = "INR" } = req.body;
+      const { amount, currency = "INR", customerInfo } = req.body;
       
-      const options = {
-        amount: amount * 100, // Razorpay expects amount in paise
-        currency,
-        receipt: `order_${Date.now()}`,
+      const orderData = {
+        order_id: `order_${Date.now()}`,
+        order_amount: amount,
+        order_currency: currency,
+        customer_details: {
+          customer_id: `customer_${Date.now()}`,
+          customer_name: customerInfo.customerName,
+          customer_email: customerInfo.customerEmail,
+          customer_phone: customerInfo.customerPhone
+        },
+        order_meta: {
+          return_url: `${req.protocol}://${req.get('host')}/payment-success`,
+          notify_url: `${req.protocol}://${req.get('host')}/api/cashfree-webhook`
+        }
       };
 
-      const order = await razorpay.orders.create(options);
+      const response = await axios.post(
+        `${cashfreeConfig.baseUrl}/pg/orders`,
+        orderData,
+        {
+          headers: {
+            'x-api-version': '2022-09-01',
+            'x-client-id': cashfreeConfig.appId,
+            'x-client-secret': cashfreeConfig.secretKey,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
       res.json({ 
-        orderId: order.id,
-        amount: order.amount,
-        currency: order.currency 
+        orderId: response.data.order_id,
+        paymentSessionId: response.data.payment_session_id,
+        amount: response.data.order_amount,
+        currency: response.data.order_currency 
       });
     } catch (error) {
-      console.error("Razorpay order creation failed:", error);
+      console.error("Cashfree order creation failed:", error);
       res.status(500).json({ message: "Failed to create payment order" });
     }
   });
 
-  // Verify payment
-  app.post("/api/verify-payment", async (req, res) => {
+  // Verify Cashfree payment
+  app.post("/api/verify-cashfree-payment", async (req, res) => {
     try {
-      const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+      const { orderId } = req.body;
       
-      // In a real implementation, you would verify the signature here
-      // For now, we'll assume the payment is successful
-      
+      const response = await axios.get(
+        `${cashfreeConfig.baseUrl}/pg/orders/${orderId}`,
+        {
+          headers: {
+            'x-api-version': '2022-09-01',
+            'x-client-id': cashfreeConfig.appId,
+            'x-client-secret': cashfreeConfig.secretKey
+          }
+        }
+      );
+
       res.json({ 
-        success: true,
-        paymentId: razorpay_payment_id,
-        orderId: razorpay_order_id 
+        success: response.data.order_status === 'PAID',
+        paymentId: response.data.cf_order_id,
+        orderId: response.data.order_id,
+        status: response.data.order_status
       });
     } catch (error) {
-      console.error("Payment verification failed:", error);
+      console.error("Cashfree payment verification failed:", error);
       res.status(500).json({ message: "Payment verification failed" });
     }
   });
