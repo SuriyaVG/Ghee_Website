@@ -1,17 +1,17 @@
-import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { X, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { useCartStore } from "@/lib/store";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import { Payment } from "./payment";
-import type { InsertOrder } from "@shared/schema";
+import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { X, Minus, Plus, ShoppingBag, Trash2 } from 'lucide-react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { useCartStore } from '@/lib/store';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
+import { Payment } from './payment';
+import type { InsertOrder } from '@shared/schema';
 
 interface CartProps {
   isOpen: boolean;
@@ -23,34 +23,34 @@ export function Cart({ isOpen, onClose }: CartProps) {
   const [showCheckout, setShowCheckout] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [customerInfo, setCustomerInfo] = useState({
-    customerName: "",
-    customerEmail: "",
-    customerPhone: "",
+    customerName: '',
+    customerEmail: '',
+    customerPhone: '',
   });
-  
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const orderMutation = useMutation({
     mutationFn: async (orderData: InsertOrder) => {
-      const response = await apiRequest("POST", "/api/orders", orderData);
+      const response = await apiRequest('POST', '/api/orders', orderData);
       return response.json();
     },
     onSuccess: (data) => {
       toast({
-        title: "Order placed successfully!",
+        title: 'Order placed successfully!',
         description: `Your order #${data.id} has been placed. We'll contact you soon to confirm delivery details.`,
       });
       clearCart();
       setShowCheckout(false);
-      setCustomerInfo({ customerName: "", customerEmail: "", customerPhone: "" });
+      setCustomerInfo({ customerName: '', customerEmail: '', customerPhone: '' });
       onClose();
     },
     onError: () => {
       toast({
-        title: "Error placing order",
-        description: "Please try again or contact us directly.",
-        variant: "destructive",
+        title: 'Error placing order',
+        description: 'Please try again or contact us directly.',
+        variant: 'destructive',
       });
     },
   });
@@ -63,9 +63,9 @@ export function Cart({ isOpen, onClose }: CartProps) {
   const handleCheckout = () => {
     if (items.length === 0) {
       toast({
-        title: "Cart is empty",
-        description: "Add some products to your cart before checkout.",
-        variant: "destructive",
+        title: 'Cart is empty',
+        description: 'Add some products to your cart before checkout.',
+        variant: 'destructive',
       });
       return;
     }
@@ -74,12 +74,12 @@ export function Cart({ isOpen, onClose }: CartProps) {
 
   const handlePlaceOrder = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!customerInfo.customerName || !customerInfo.customerEmail || !customerInfo.customerPhone) {
       toast({
-        title: "Missing information",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
+        title: 'Missing information',
+        description: 'Please fill in all required fields.',
+        variant: 'destructive',
       });
       return;
     }
@@ -91,7 +91,7 @@ export function Cart({ isOpen, onClose }: CartProps) {
     clearCart();
     setShowCheckout(false);
     setShowPayment(false);
-    setCustomerInfo({ customerName: "", customerEmail: "", customerPhone: "" });
+    setCustomerInfo({ customerName: '', customerEmail: '', customerPhone: '' });
     onClose();
   };
 
@@ -100,9 +100,9 @@ export function Cart({ isOpen, onClose }: CartProps) {
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCustomerInfo(prev => ({
+    setCustomerInfo((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     }));
   };
 
@@ -116,7 +116,7 @@ export function Cart({ isOpen, onClose }: CartProps) {
               Payment
             </SheetTitle>
           </SheetHeader>
-          
+
           <div className="mt-6">
             <Payment
               items={items}
@@ -141,14 +141,16 @@ export function Cart({ isOpen, onClose }: CartProps) {
               Checkout
             </SheetTitle>
           </SheetHeader>
-          
+
           <div className="mt-6 space-y-6">
             <div>
               <h3 className="font-playfair font-bold text-lg mb-4">Order Summary</h3>
               <div className="space-y-2">
                 {items.map((item) => (
                   <div key={item.product.id} className="flex justify-between text-sm">
-                    <span>{item.product.name} x {item.quantity}</span>
+                    <span>
+                      {item.product.name} x {item.quantity}
+                    </span>
                     <span>₹{(parseFloat(item.product.price) * item.quantity).toFixed(2)}</span>
                   </div>
                 ))}
@@ -196,7 +198,7 @@ export function Cart({ isOpen, onClose }: CartProps) {
                   required
                 />
               </div>
-              
+
               <div className="flex gap-2">
                 <Button
                   type="button"
@@ -211,7 +213,7 @@ export function Cart({ isOpen, onClose }: CartProps) {
                   disabled={orderMutation.isPending}
                   className="flex-1 bg-warm-gold hover:bg-rich-brown"
                 >
-                  {orderMutation.isPending ? "Placing Order..." : "Place Order"}
+                  {orderMutation.isPending ? 'Placing Order...' : 'Place Order'}
                 </Button>
               </div>
             </form>
@@ -230,7 +232,7 @@ export function Cart({ isOpen, onClose }: CartProps) {
             Shopping Cart ({items.length})
           </SheetTitle>
         </SheetHeader>
-        
+
         <div className="mt-6 space-y-6">
           {items.length === 0 ? (
             <div className="text-center py-12">
@@ -257,7 +259,9 @@ export function Cart({ isOpen, onClose }: CartProps) {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleQuantityChange(item.product.id, item.quantity - 1)}
+                              onClick={() =>
+                                handleQuantityChange(item.product.id, item.quantity - 1)
+                              }
                               className="w-8 h-8 p-0"
                             >
                               <Minus className="w-4 h-4" />
@@ -266,7 +270,9 @@ export function Cart({ isOpen, onClose }: CartProps) {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleQuantityChange(item.product.id, item.quantity + 1)}
+                              onClick={() =>
+                                handleQuantityChange(item.product.id, item.quantity + 1)
+                              }
                               className="w-8 h-8 p-0"
                             >
                               <Plus className="w-4 h-4" />
@@ -274,7 +280,9 @@ export function Cart({ isOpen, onClose }: CartProps) {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-sm">₹{(parseFloat(item.product.price) * item.quantity).toFixed(2)}</p>
+                          <p className="font-bold text-sm">
+                            ₹{(parseFloat(item.product.price) * item.quantity).toFixed(2)}
+                          </p>
                           <Button
                             variant="ghost"
                             size="sm"
@@ -289,15 +297,17 @@ export function Cart({ isOpen, onClose }: CartProps) {
                   </Card>
                 ))}
               </div>
-              
+
               <Separator />
-              
+
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-playfair font-bold">Total:</span>
-                  <span className="text-xl font-playfair font-bold text-warm-gold">₹{getTotalPrice().toFixed(2)}</span>
+                  <span className="text-xl font-playfair font-bold text-warm-gold">
+                    ₹{getTotalPrice().toFixed(2)}
+                  </span>
                 </div>
-                
+
                 <Button
                   onClick={handleCheckout}
                   className="w-full bg-warm-gold hover:bg-rich-brown text-white"
@@ -305,7 +315,7 @@ export function Cart({ isOpen, onClose }: CartProps) {
                 >
                   Proceed to Checkout
                 </Button>
-                
+
                 <Button
                   variant="outline"
                   onClick={clearCart}
