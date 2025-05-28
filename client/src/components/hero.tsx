@@ -1,5 +1,6 @@
 import { Award, ShoppingBag, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Image } from "@/components/ui/image";
 
 export function Hero() {
   const scrollToSection = (sectionId: string) => {
@@ -62,10 +63,11 @@ export function Hero() {
             </div>
           </div>
           <div className="relative">
-            <img
-              src="https://images.unsplash.com/photo-1599599810769-bcde5a160d32?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600"
+            <Image
+              src="/images/hero-background.jpg"
               alt="Traditional ghee in golden jar"
               className="rounded-2xl shadow-2xl w-full h-96 object-cover"
+              loading="lazy"
             />
             <div className="absolute -bottom-6 -left-6 bg-white p-6 rounded-xl shadow-lg border border-warm-gold/20">
               <div className="flex items-center space-x-3">

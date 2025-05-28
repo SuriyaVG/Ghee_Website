@@ -1,17 +1,28 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Product } from '@shared/schema';
+// Product type is not directly stored in cart item anymore, but its details are spread.
+// We might still need ProductWithVariants if we want to fetch full product details from cart.
 
+// New CartItem definition
 export interface CartItem {
-  product: Product;
+  id: string; // Composite key: `productId-variantId`
+  productId: number;
+  name: string; // Product name
+  variant: {
+    id: number;
+    size: string;
+    price: number; // Store as number
+    image_url: string;
+  };
   quantity: number;
+  price: number; // Price of this specific variant at the time of adding to cart
 }
 
 interface CartStore {
   items: CartItem[];
-  addItem: (product: Product) => void;
-  removeItem: (productId: number) => void;
-  updateQuantity: (productId: number, quantity: number) => void;
+  addItem: (itemDetails: Omit<CartItem, 'quantity'> & { quantity?: number }) => void;
+  removeItem: (cartItemId: string) => void; // Use composite ID
+  updateQuantity: (cartItemId: string, quantity: number) => void; // Use composite ID
   clearCart: () => void;
   getTotalItems: () => number;
   getTotalPrice: () => number;
@@ -22,40 +33,39 @@ export const useCartStore = create<CartStore>()(
     (set, get) => ({
       items: [],
       
-      addItem: (product: Product) => {
+      addItem: (itemDetails: Omit<CartItem, 'quantity'> & { quantity?: number }) => {
         set((state) => {
-          const existingItem = state.items.find(item => item.product.id === product.id);
+          const existingItem = state.items.find(item => item.id === itemDetails.id);
           if (existingItem) {
             return {
               items: state.items.map(item =>
-                item.product.id === product.id
-                  ? { ...item, quantity: item.quantity + 1 }
+                item.id === itemDetails.id
+                  ? { ...item, quantity: item.quantity + (itemDetails.quantity || 1) }
                   : item
               ),
             };
           } else {
             return {
-              items: [...state.items, { product, quantity: 1 }],
+              items: [...state.items, { ...itemDetails, quantity: itemDetails.quantity || 1 }],
             };
           }
         });
       },
       
-      removeItem: (productId: number) => {
+      removeItem: (cartItemId: string) => {
         set((state) => ({
-          items: state.items.filter(item => item.product.id !== productId),
+          items: state.items.filter(item => item.id !== cartItemId),
         }));
       },
       
-      updateQuantity: (productId: number, quantity: number) => {
+      updateQuantity: (cartItemId: string, quantity: number) => {
         if (quantity <= 0) {
-          get().removeItem(productId);
+          get().removeItem(cartItemId);
           return;
         }
-        
         set((state) => ({
           items: state.items.map(item =>
-            item.product.id === productId
+            item.id === cartItemId
               ? { ...item, quantity }
               : item
           ),
@@ -72,7 +82,7 @@ export const useCartStore = create<CartStore>()(
       
       getTotalPrice: () => {
         return get().items.reduce((total, item) => {
-          return total + (parseFloat(item.product.price) * item.quantity);
+          return total + (item.price * item.quantity); // item.price is already a number
         }, 0);
       },
     }),

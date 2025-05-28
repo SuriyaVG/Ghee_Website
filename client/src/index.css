@@ -1,7 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;500;600&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;500;600&display=swap');
 
 :root {
   /* Modern Blue Theme */
@@ -88,16 +88,32 @@
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border transition-colors duration-200 ease-in-out;
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-sans antialiased text-foreground;
     font-family: 'Lato', sans-serif;
   }
   
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Playfair Display', serif;
+  }
+
+  .font-lato {
+    font-family: 'Lato', sans-serif;
+  }
+
+  button, a {
+    @apply transition-all duration-200 ease-in-out;
+  }
+
+  img {
+    @apply transition-transform duration-300 ease-in-out;
+  }
+
+  .heritage-theme body {
+    background-image: linear-gradient(to bottom right, hsl(var(--cream-bg)), hsl(var(--warm-gold) / 0.3));
   }
 }
 
