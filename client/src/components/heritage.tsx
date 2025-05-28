@@ -1,3 +1,6 @@
+import { motion } from "framer-motion";
+import { Image } from "@/components/ui/image";
+
 export function Heritage() {
   const timelineItems = [
     {
@@ -28,17 +31,17 @@ export function Heritage() {
 
   const familyValues = [
     {
-      image: "https://images.unsplash.com/photo-1574484284002-952d92456975?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=300",
+      image: "/images/ghee-250ml.jpg",
       title: "Family Values",
       description: "Every jar is made with the love and care of a family recipe"
     },
     {
-      image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=300",
+      image: "/images/ghee-500ml.jpg",
       title: "Traditional Methods",
       description: "Time-honored techniques ensure authentic taste and quality"
     },
     {
-      image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=400&h=300",
+      image: "/images/ghee-1000ml.jpg",
       title: "Quality Promise",
       description: "50 years of trust built on consistent quality and purity"
     }
@@ -59,7 +62,14 @@ export function Heritage() {
             {/* Timeline */}
             <div className="space-y-8">
               {timelineItems.map((item, index) => (
-                <div key={index} className="flex items-start space-x-4">
+                <motion.div
+                  key={index}
+                  className="flex items-start space-x-4"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                >
                   <div className={`w-12 h-12 ${item.bgColor} rounded-full flex items-center justify-center flex-shrink-0 mt-1`}>
                     <span className="text-white font-bold text-sm">{item.year}</span>
                   </div>
@@ -67,16 +77,17 @@ export function Heritage() {
                     <h3 className="text-xl font-playfair font-bold text-deep-brown mb-2">{item.title}</h3>
                     <p className="text-deep-brown/70">{item.description}</p>
                   </div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
 
           <div className="relative">
-            <img
-              src="https://pixabay.com/get/gbae4a90efe7aaa284f0cd382c77c771d1a3e9f21168a3927c5055f600c98c5404d0d33ada63fa74d1dc9e984cf8d88a307e2f7454bd192fa45aa8b2aa09bec90_1280.jpg"
+            <Image
+              src="/images/hero-background.jpg"
               alt="Traditional heritage cooking setup"
               className="rounded-2xl shadow-2xl w-full h-96 object-cover"
+              loading="lazy"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-deep-brown/50 to-transparent rounded-2xl"></div>
             <div className="absolute bottom-6 left-6 text-white">
@@ -90,15 +101,23 @@ export function Heritage() {
         <div className="bg-white rounded-2xl p-8 shadow-lg">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {familyValues.map((value, index) => (
-              <div key={index} className="text-center space-y-4">
-                <img
+              <motion.div
+                key={index}
+                className="text-center space-y-4"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.15 }}
+                viewport={{ once: true }}
+              >
+                <Image
                   src={value.image}
                   alt={value.title}
                   className="w-full h-48 object-cover rounded-xl"
+                  loading="lazy"
                 />
                 <h3 className="text-xl font-playfair font-bold text-deep-brown">{value.title}</h3>
                 <p className="text-deep-brown/70">{value.description}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>

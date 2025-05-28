@@ -3,12 +3,12 @@ import { Link, useLocation } from "wouter";
 import { ShoppingCart, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/lib/store";
-import { Cart } from "./cart";
+// import { Cart } from "./cart"; // Cart drawer might be replaced by CartPage
 
 export function Navbar() {
   const [location] = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isCartOpen, setIsCartOpen] = useState(false);
+  // const [isCartOpen, setIsCartOpen] = useState(false); // Cart drawer state might be removed
   const totalItems = useCartStore((state) => state.getTotalItems());
 
   const scrollToSection = (sectionId: string) => {
@@ -49,25 +49,31 @@ export function Navbar() {
                     {item.label}
                   </button>
                 ))}
+                {/* Updated Cart Button for Desktop */}
                 <Button
-                  onClick={() => setIsCartOpen(true)}
+                  asChild // Use asChild to make Button behave like Link
                   className="bg-warm-gold text-white hover:bg-rich-brown transition-colors"
                 >
+                  <Link href="/cart">
                   <ShoppingCart className="w-4 h-4 mr-2" />
                   Cart ({totalItems})
+                  </Link>
                 </Button>
               </div>
             </div>
             
             <div className="md:hidden flex items-center space-x-2">
+              {/* Updated Cart Button for Mobile */}
               <Button
-                onClick={() => setIsCartOpen(true)}
+                asChild // Use asChild to make Button behave like Link
                 variant="outline"
                 size="sm"
                 className="border-warm-gold text-warm-gold hover:bg-warm-gold hover:text-white"
               >
+                <Link href="/cart">
                 <ShoppingCart className="w-4 h-4" />
                 <span className="ml-1">{totalItems}</span>
+                </Link>
               </Button>
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -97,7 +103,8 @@ export function Navbar() {
         </div>
       </nav>
       
-      <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+      {/* <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} /> */}
+      {/* Commenting out Cart drawer for now, as we have a CartPage */}
     </>
   );
 }

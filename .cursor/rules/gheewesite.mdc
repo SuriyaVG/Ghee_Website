@@ -1,0 +1,11 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+#important:
+# always read gheewebsite.md before writing the code
+# After adding a major feature or completing a milestone, update gheewebsite.md
+# document the entire database schema in gheewebsite.md
+# For new migration, make sure to add them to the same file
+
