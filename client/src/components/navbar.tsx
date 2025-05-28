@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { Link, useLocation } from "wouter";
-import { ShoppingCart, Menu, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useCartStore } from "@/lib/store";
+import { useState } from 'react';
+import { Link, useLocation } from 'wouter';
+import { ShoppingCart, Menu, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useCartStore } from '@/lib/store';
 // import { Cart } from "./cart"; // Cart drawer might be replaced by CartPage
 
 export function Navbar() {
@@ -20,10 +20,10 @@ export function Navbar() {
   };
 
   const navItems = [
-    { id: "home", label: "Home" },
-    { id: "products", label: "Products" },
-    { id: "heritage", label: "Our Heritage" },
-    { id: "contact", label: "Contact" },
+    { id: 'home', label: 'Home' },
+    { id: 'products', label: 'Products' },
+    { id: 'heritage', label: 'Our Heritage' },
+    { id: 'contact', label: 'Contact' },
   ];
 
   return (
@@ -37,7 +37,7 @@ export function Navbar() {
                 <p className="text-xs text-rich-brown -mt-1">Since 1974</p>
               </Link>
             </div>
-            
+
             <div className="hidden md:block">
               <div className="ml-10 flex items-baseline space-x-8">
                 {navItems.map((item) => (
@@ -55,13 +55,13 @@ export function Navbar() {
                   className="bg-warm-gold text-white hover:bg-rich-brown transition-colors"
                 >
                   <Link href="/cart">
-                  <ShoppingCart className="w-4 h-4 mr-2" />
-                  Cart ({totalItems})
+                    <ShoppingCart className="w-4 h-4 mr-2" />
+                    Cart ({totalItems})
                   </Link>
                 </Button>
               </div>
             </div>
-            
+
             <div className="md:hidden flex items-center space-x-2">
               {/* Updated Cart Button for Mobile */}
               <Button
@@ -71,8 +71,8 @@ export function Navbar() {
                 className="border-warm-gold text-warm-gold hover:bg-warm-gold hover:text-white"
               >
                 <Link href="/cart">
-                <ShoppingCart className="w-4 h-4" />
-                <span className="ml-1">{totalItems}</span>
+                  <ShoppingCart className="w-4 h-4" />
+                  <span className="ml-1">{totalItems}</span>
                 </Link>
               </Button>
               <button
@@ -83,7 +83,7 @@ export function Navbar() {
               </button>
             </div>
           </div>
-          
+
           {/* Mobile menu */}
           {isMenuOpen && (
             <div className="md:hidden">
@@ -102,7 +102,7 @@ export function Navbar() {
           )}
         </div>
       </nav>
-      
+
       {/* <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} /> */}
       {/* Commenting out Cart drawer for now, as we have a CartPage */}
     </>

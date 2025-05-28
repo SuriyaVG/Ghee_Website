@@ -32,13 +32,13 @@ export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
-      
+
       addItem: (itemDetails: Omit<CartItem, 'quantity'> & { quantity?: number }) => {
         set((state) => {
-          const existingItem = state.items.find(item => item.id === itemDetails.id);
+          const existingItem = state.items.find((item) => item.id === itemDetails.id);
           if (existingItem) {
             return {
-              items: state.items.map(item =>
+              items: state.items.map((item) =>
                 item.id === itemDetails.id
                   ? { ...item, quantity: item.quantity + (itemDetails.quantity || 1) }
                   : item
@@ -51,38 +51,34 @@ export const useCartStore = create<CartStore>()(
           }
         });
       },
-      
+
       removeItem: (cartItemId: string) => {
         set((state) => ({
-          items: state.items.filter(item => item.id !== cartItemId),
+          items: state.items.filter((item) => item.id !== cartItemId),
         }));
       },
-      
+
       updateQuantity: (cartItemId: string, quantity: number) => {
         if (quantity <= 0) {
           get().removeItem(cartItemId);
           return;
         }
         set((state) => ({
-          items: state.items.map(item =>
-            item.id === cartItemId
-              ? { ...item, quantity }
-              : item
-          ),
+          items: state.items.map((item) => (item.id === cartItemId ? { ...item, quantity } : item)),
         }));
       },
-      
+
       clearCart: () => {
         set({ items: [] });
       },
-      
+
       getTotalItems: () => {
         return get().items.reduce((total, item) => total + item.quantity, 0);
       },
-      
+
       getTotalPrice: () => {
         return get().items.reduce((total, item) => {
-          return total + (item.price * item.quantity); // item.price is already a number
+          return total + item.price * item.quantity; // item.price is already a number
         }, 0);
       },
     }),

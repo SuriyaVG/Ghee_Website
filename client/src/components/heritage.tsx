@@ -1,59 +1,66 @@
-import { motion } from "framer-motion";
-import { Image } from "@/components/ui/image";
+import { motion } from 'framer-motion';
+import { Image } from '@/components/ui/image';
 
 export function Heritage() {
   const timelineItems = [
     {
-      year: "1974",
-      title: "The Beginning",
-      description: "Founded by our grandfather with a simple vision: to create the purest ghee using traditional methods passed down through generations.",
-      bgColor: "bg-warm-gold"
+      year: '1974',
+      title: 'The Beginning',
+      description:
+        'Founded by our grandfather with a simple vision: to create the purest ghee using traditional methods passed down through generations.',
+      bgColor: 'bg-warm-gold',
     },
     {
-      year: "1990",
-      title: "Expansion",
-      description: "Second generation took over, expanding our reach while maintaining the same quality and traditional methods that made us trusted.",
-      bgColor: "bg-rich-brown"
+      year: '1990',
+      title: 'Expansion',
+      description:
+        'Second generation took over, expanding our reach while maintaining the same quality and traditional methods that made us trusted.',
+      bgColor: 'bg-rich-brown',
     },
     {
-      year: "2010",
-      title: "Innovation",
-      description: "Introduced modern packaging while preserving traditional preparation methods, making our ghee accessible to more families.",
-      bgColor: "bg-butter-yellow"
+      year: '2010',
+      title: 'Innovation',
+      description:
+        'Introduced modern packaging while preserving traditional preparation methods, making our ghee accessible to more families.',
+      bgColor: 'bg-butter-yellow',
     },
     {
-      year: "2024",
-      title: "Digital Era",
-      description: "Today, we continue our legacy with the third generation, bringing our heritage ghee to your doorstep with the same love and care.",
-      bgColor: "bg-warm-gold"
-    }
+      year: '2024',
+      title: 'Digital Era',
+      description:
+        'Today, we continue our legacy with the third generation, bringing our heritage ghee to your doorstep with the same love and care.',
+      bgColor: 'bg-warm-gold',
+    },
   ];
 
   const familyValues = [
     {
-      image: "/images/ghee-250ml.jpg",
-      title: "Family Values",
-      description: "Every jar is made with the love and care of a family recipe"
+      image: '/images/ghee-250ml.jpg',
+      title: 'Family Values',
+      description: 'Every jar is made with the love and care of a family recipe',
     },
     {
-      image: "/images/ghee-500ml.jpg",
-      title: "Traditional Methods",
-      description: "Time-honored techniques ensure authentic taste and quality"
+      image: '/images/ghee-500ml.jpg',
+      title: 'Traditional Methods',
+      description: 'Time-honored techniques ensure authentic taste and quality',
     },
     {
-      image: "/images/ghee-1000ml.jpg",
-      title: "Quality Promise",
-      description: "50 years of trust built on consistent quality and purity"
-    }
+      image: '/images/ghee-1000ml.jpg',
+      title: 'Quality Promise',
+      description: '50 years of trust built on consistent quality and purity',
+    },
   ];
 
   return (
     <section id="heritage" className="py-20 bg-cream-bg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-playfair font-bold text-deep-brown mb-4">Five Decades of Heritage</h2>
+          <h2 className="text-4xl font-playfair font-bold text-deep-brown mb-4">
+            Five Decades of Heritage
+          </h2>
           <p className="text-xl text-deep-brown/70 max-w-3xl mx-auto">
-            From a small family kitchen to a trusted name in pure ghee, discover the journey that spans three generations
+            From a small family kitchen to a trusted name in pure ghee, discover the journey that
+            spans three generations
           </p>
         </div>
 
@@ -70,11 +77,15 @@ export function Heritage() {
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   viewport={{ once: true }}
                 >
-                  <div className={`w-12 h-12 ${item.bgColor} rounded-full flex items-center justify-center flex-shrink-0 mt-1`}>
+                  <div
+                    className={`w-12 h-12 ${item.bgColor} rounded-full flex items-center justify-center flex-shrink-0 mt-1`}
+                  >
                     <span className="text-white font-bold text-sm">{item.year}</span>
                   </div>
                   <div>
-                    <h3 className="text-xl font-playfair font-bold text-deep-brown mb-2">{item.title}</h3>
+                    <h3 className="text-xl font-playfair font-bold text-deep-brown mb-2">
+                      {item.title}
+                    </h3>
                     <p className="text-deep-brown/70">{item.description}</p>
                   </div>
                 </motion.div>

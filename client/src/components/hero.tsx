@@ -1,6 +1,6 @@
-import { Award, ShoppingBag, History } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Image } from "@/components/ui/image";
+import { Award, ShoppingBag, History } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Image } from '@/components/ui/image';
 
 export function Hero() {
   const scrollToSection = (sectionId: string) => {
@@ -20,26 +20,28 @@ export function Hero() {
                 <div className="w-12 h-12 bg-warm-gold rounded-full flex items-center justify-center">
                   <Award className="text-white w-6 h-6" />
                 </div>
-                <span className="text-warm-gold font-playfair font-medium">50 Years of Heritage</span>
+                <span className="text-warm-gold font-playfair font-medium">
+                  50 Years of Heritage
+                </span>
               </div>
               <h1 className="text-5xl lg:text-6xl font-playfair font-bold text-deep-brown leading-tight">
                 Pure <span className="text-warm-gold">Ghee</span>,<br />
                 Pure <span className="text-warm-gold">Heritage</span>
               </h1>
               <p className="text-xl text-deep-brown/80 leading-relaxed">
-                Experience the authentic taste of tradition with GSR's premium ghee, crafted using time-honored methods passed down through generations of our family business.
+                Experience GSR&apos;s pure ghee, crafted with love for over 50 years.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button
-                onClick={() => scrollToSection("products")}
+                onClick={() => scrollToSection('products')}
                 className="hover:bg-rich-brown transition-colors shadow-lg px-8 py-4 text-lg text-[#0a0a0a] bg-[#1f000000]"
               >
                 <ShoppingBag className="w-5 h-5 mr-2" />
                 Shop Now
               </Button>
               <Button
-                onClick={() => scrollToSection("heritage")}
+                onClick={() => scrollToSection('heritage')}
                 variant="outline"
                 className="border-2 border-warm-gold text-warm-gold hover:bg-warm-gold hover:text-white transition-colors px-8 py-4 text-lg"
               >

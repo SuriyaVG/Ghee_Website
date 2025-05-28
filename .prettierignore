@@ -1,0 +1,7 @@
+node_modules/
+dist/
+build/
+coverage/
+package-lock.json
+# Add any other files or directories you want Prettier to ignore
+# client/vite-env.d.ts 

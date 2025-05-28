@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { CreditCard, Shield, Lock } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
-import type { CartItem } from "@/lib/store";
+import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { CreditCard, Shield, Lock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
+import type { CartItem } from '@/lib/store';
 
 interface PaymentProps {
   items: CartItem[];
@@ -25,86 +25,101 @@ export function Payment({ items, total, customerInfo, onSuccess, onCancel }: Pay
 
   const createOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
-      const response = await apiRequest("POST", "/api/orders", orderData);
+      const response = await apiRequest('POST', '/api/orders', orderData);
       return response.json();
     },
   });
 
   const createCashfreeOrderMutation = useMutation({
     mutationFn: async ({ amount, customerInfo }: { amount: number; customerInfo: any }) => {
-      const response = await apiRequest("POST", "/api/create-cashfree-order", { amount, customerInfo });
+      const response = await apiRequest('POST', '/api/create-cashfree-order', {
+        amount,
+        customerInfo,
+      });
       return response.json();
     },
   });
 
   const handlePayment = async () => {
     setIsProcessing(true);
-    
+
     try {
       // Create Cashfree order
-      const cashfreeOrder = await createCashfreeOrderMutation.mutateAsync({ 
-        amount: total, 
-        customerInfo 
-      });
-      
-      // Configure Cashfree options
-      const cashfree = new (window as any).Cashfree({
-        mode: import.meta.env.VITE_CASHFREE_ENV || 'sandbox'
+      const cashfreeOrder = await createCashfreeOrderMutation.mutateAsync({
+        amount: total,
+        customerInfo,
       });
 
-      const checkoutOptions = {
-        paymentSessionId: cashfreeOrder.paymentSessionId,
-        returnUrl: window.location.origin + '/payment-success'
-      };
-
-      cashfree.checkout(checkoutOptions).then(async (result: any) => {
-        if (result.error) {
+      if (cashfreeOrder && cashfreeOrder.orderId) {
+        try {
+          const temporaryOrderData = {
+            customerInfo,
+            items,
+            total,
+          };
+          sessionStorage.setItem(
+            `cf_pending_order_${cashfreeOrder.orderId}`,
+            JSON.stringify(temporaryOrderData)
+          );
+        } catch (e) {
+          console.error('Failed to save temporary order data to sessionStorage', e);
           setIsProcessing(false);
           toast({
-            title: "Payment failed",
-            description: result.error.message || "Payment could not be processed.",
-            variant: "destructive",
+            title: 'Error',
+            description: 'Could not prepare payment session. Please try again.',
+            variant: 'destructive',
           });
           return;
         }
 
-        if (result.redirect) {
-          // Handle successful payment
-          try {
-            const orderData = {
-              ...customerInfo,
-              items: JSON.stringify(items),
-              total: total.toString(),
-              status: 'paid',
-              paymentId: result.paymentDetails?.paymentId,
-              paymentStatus: 'completed',
-              razorpayOrderId: cashfreeOrder.orderId,
-            };
-
-            await createOrderMutation.mutateAsync(orderData);
-            
-            toast({
-              title: "Payment successful!",
-              description: "Your order has been placed successfully. We'll contact you soon for delivery.",
-            });
-            
-            onSuccess();
-          } catch (error) {
-            toast({
-              title: "Order creation failed",
-              description: "Payment was successful but order creation failed. Please contact support.",
-              variant: "destructive",
-            });
-          }
+        // Configure Cashfree options
+        if (!import.meta.env.VITE_CASHFREE_ENV) {
+          console.error(
+            'VITE_CASHFREE_ENV is not set. Cashfree payment might not initialize correctly or use an unintended mode.'
+          );
+          toast({
+            title: 'Configuration Error',
+            description: 'Payment system is not configured correctly. Please contact support.',
+            variant: 'destructive',
+          });
+          setIsProcessing(false);
+          return;
         }
-      });
-      
+
+        const cashfree = new (window as any).Cashfree({
+          mode: import.meta.env.VITE_CASHFREE_ENV,
+        });
+
+        const checkoutOptions = {
+          paymentSessionId: cashfreeOrder.paymentSessionId,
+          returnUrl: `${window.location.origin}/payment-success?cf_order_id=${cashfreeOrder.orderId}`,
+        };
+
+        cashfree.checkout(checkoutOptions).then(async (result: any) => {
+          if (result.error) {
+            setIsProcessing(false);
+            toast({
+              title: 'Payment failed',
+              description: result.error.message || 'Payment could not be processed.',
+              variant: 'destructive',
+            });
+            return;
+          }
+
+          if (result.redirect) {
+            // The redirection to Cashfree will happen.
+            // Order creation and onSuccess will be handled on the /payment-success page.
+            // No explicit action needed here anymore for successful payment initiation.
+            // The browser will automatically redirect.
+          }
+        });
+      }
     } catch (error) {
       setIsProcessing(false);
       toast({
-        title: "Payment failed",
-        description: "Unable to process payment. Please try again.",
-        variant: "destructive",
+        title: 'Payment failed',
+        description: 'Unable to process payment. Please try again.',
+        variant: 'destructive',
       });
     }
   };
@@ -120,18 +135,19 @@ export function Payment({ items, total, customerInfo, onSuccess, onCancel }: Pay
       };
 
       await createOrderMutation.mutateAsync(orderData);
-      
+
       toast({
-        title: "Order placed successfully!",
-        description: "Your order has been placed. We'll contact you soon to confirm delivery and payment.",
+        title: 'Order placed successfully!',
+        description:
+          "Your order has been placed. We'll contact you soon to confirm delivery and payment.",
       });
-      
+
       onSuccess();
     } catch (error) {
       toast({
-        title: "Order failed",
-        description: "Unable to place order. Please try again.",
-        variant: "destructive",
+        title: 'Order failed',
+        description: 'Unable to place order. Please try again.',
+        variant: 'destructive',
       });
     }
   };
@@ -150,7 +166,9 @@ export function Payment({ items, total, customerInfo, onSuccess, onCancel }: Pay
           <div className="space-y-2">
             {items.map((item) => (
               <div key={item.product.id} className="flex justify-between text-sm">
-                <span>{item.product.name} x {item.quantity}</span>
+                <span>
+                  {item.product.name} x {item.quantity}
+                </span>
                 <span>₹{(parseFloat(item.product.price) * item.quantity).toFixed(2)}</span>
               </div>
             ))}
@@ -167,7 +185,7 @@ export function Payment({ items, total, customerInfo, onSuccess, onCancel }: Pay
       {/* Payment Options */}
       <div className="space-y-4">
         <h3 className="text-lg font-playfair font-bold">Choose Payment Method</h3>
-        
+
         {/* Online Payment */}
         <Card className="border-2 border-primary hover:bg-primary/5 transition-colors">
           <CardContent className="p-6">
@@ -186,7 +204,7 @@ export function Payment({ items, total, customerInfo, onSuccess, onCancel }: Pay
                 disabled={isProcessing}
                 className="bg-primary hover:bg-primary/90"
               >
-                {isProcessing ? "Processing..." : `Pay ₹${total.toFixed(2)}`}
+                {isProcessing ? 'Processing...' : `Pay ₹${total.toFixed(2)}`}
               </Button>
             </div>
             <div className="flex items-center gap-2 mt-3 text-xs text-muted-foreground">
@@ -214,7 +232,7 @@ export function Payment({ items, total, customerInfo, onSuccess, onCancel }: Pay
                 onClick={handleCashOnDelivery}
                 disabled={createOrderMutation.isPending}
               >
-                {createOrderMutation.isPending ? "Placing..." : "Place Order"}
+                {createOrderMutation.isPending ? 'Placing...' : 'Place Order'}
               </Button>
             </div>
           </CardContent>
