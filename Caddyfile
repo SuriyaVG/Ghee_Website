@@ -1,17 +1,17 @@
 {
-    # Railway will inject the correct port settings.
-    # This block can often be left empty or for global options.
+    # Global options
+    admin off
 }
 
 # This will automatically use the domain Railway assigns to your service.
-:80 { 
+:{$PORT} {
     root * /app/dist/public
     
     encode gzip zstd
 
     # Handle API routes by proxying to your Node.js backend
     @api_paths path_regexp ^/api(?:$|/.*$)
-    reverse_proxy @api_paths http://localhost:5000 
+    reverse_proxy @api_paths http://localhost:5000
 
     file_server
 
