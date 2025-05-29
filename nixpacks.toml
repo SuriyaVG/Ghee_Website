@@ -1,0 +1,5 @@
+        # nixpacks.toml
+        providers = ["caddy"]
+
+        [phases.start]
+        cmd = "caddy run --config /app/Caddyfile --adapter caddyfile"
