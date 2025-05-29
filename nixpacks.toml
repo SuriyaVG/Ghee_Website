@@ -3,13 +3,9 @@
 [phases.setup]
 providers = ["nodejs", "caddy"]
 nixPkgs = ["coreutils"]
-aptPkgs = ["nodejs", "npm"]
 
 [phases.install]
-cmds = [
-    "npm install -g npm@latest",
-    "npm ci"
-]
+cmds = ["npm ci"]
 
 [phases.build]
 cmds = [
@@ -17,5 +13,5 @@ cmds = [
     "chmod +x start.sh"
 ]
 
-[start]
+[phases.start]
 cmd = "./start.sh" 
