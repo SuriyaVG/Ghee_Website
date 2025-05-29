@@ -129,15 +129,15 @@ app.use(express.urlencoded({ extended: false }));
     serveStatic(app);
   }
 
-  const port = process.env.PORT || 5000;
+  const backendPort = 5000; // NEW - Define a fixed internal port for the backend
   server.listen(
     {
-      port: Number(port),
+      port: Number(backendPort), // NEW - Use backendPort
       host: '0.0.0.0', // Listen on all available network interfaces
     },
     () => {
       // Use the main logger for application lifecycle events
-      logger.info(`Server listening on port ${port}`);
+      logger.info(`Backend server listening on internal port ${backendPort}`); // Update log message
     }
   );
 })();
