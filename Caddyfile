@@ -5,15 +5,17 @@
 
 # This will automatically use the domain Railway assigns to your service.
 :{$PORT} {
-    root * /app/dist/public
-    
-    encode gzip zstd
-
-    # Handle API routes by proxying to your Node.js backend
+    # Handle API routes first
     @api_paths path_regexp ^/api(?:$|/.*$)
-    reverse_proxy @api_paths http://localhost:5000
+    handle @api_paths {
+        reverse_proxy http://localhost:5000
+    }
 
-    file_server
-
-    try_files {path} {path}/ /index.html
+    # Handle all other routes
+    handle {
+        root * /app/dist/public
+        try_files {path} /index.html
+        file_server
+        encode gzip zstd
+    }
 }
