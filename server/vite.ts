@@ -61,17 +61,40 @@ export async function setupVite(app: Express, server: Server) {
 
 export function serveStatic(app: Express) {
   const distPath = path.resolve(import.meta.dirname, 'public');
+  console.log(`[ServeStatic] Production: Trying to serve static files from: ${distPath}`);
 
   if (!fs.existsSync(distPath)) {
+    console.error(`[ServeStatic] Production: ERROR! Directory NOT FOUND: ${distPath}`);
     throw new Error(
       `Could not find the build directory: ${distPath}, make sure to build the client first`
     );
+  } else {
+    console.log(`[ServeStatic] Production: Directory FOUND: ${distPath}`);
   }
+
+  app.use((req, _res, next) => {
+    console.log(`[ServeStatic] Production: Incoming request: ${req.method} ${req.originalUrl}`);
+    next();
+  });
 
   app.use(express.static(distPath));
 
-  // fall through to index.html if the file doesn't exist
-  app.use('*', (_req, res) => {
-    res.sendFile(path.resolve(distPath, 'index.html'));
+  app.use('*', (req, res) => {
+    const indexPath = path.resolve(distPath, 'index.html');
+    console.log(`[ServeStatic] Production: Attempting to send file: ${indexPath} for ${req.originalUrl}`);
+    if (!fs.existsSync(indexPath)) {
+        console.error(`[ServeStatic] Production: ERROR! index.html NOT FOUND at: ${indexPath}`);
+        return res.status(404).send('index.html not found by server configuration.');
+    }
+    res.sendFile(indexPath, (err) => {
+      if (err) {
+        console.error(`[ServeStatic] Production: ERROR sending file ${indexPath}:`, err);
+        if (!res.headersSent) {
+            res.status(500).send('Server error sending file.');
+        }
+      } else {
+        console.log(`[ServeStatic] Production: Successfully sent ${indexPath}`);
+      }
+    });
   });
 }
