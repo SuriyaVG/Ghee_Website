@@ -1,19 +1,27 @@
 {
     # Global options
     admin off
+    auto_https off
 }
 
 # This will automatically use the domain Railway assigns to your service.
 :{$PORT} {
+    # Enable logging
+    log {
+        format console
+        level INFO
+    }
+
     # Handle API routes first
     @api_paths path_regexp ^/api(?:$|/.*$)
     handle @api_paths {
+        uri strip_prefix /api
         reverse_proxy http://localhost:5000
     }
 
     # Handle all other routes
     handle {
-        root * /app/dist/public
+        root * dist/public
         try_files {path} /index.html
         file_server
         encode gzip zstd
