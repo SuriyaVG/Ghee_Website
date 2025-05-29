@@ -13,6 +13,7 @@ const app = express();
 const allowedOrigins = [
   'http://localhost:5000', // Vite dev server (often proxies to itself or backend port)
   'http://127.0.0.1:5000',
+  'https://gheewebsite-production.up.railway.app', // Your production frontend URL
   // Add your production frontend URL here when deploying
   // e.g., 'https://www.yourdomain.com'
 ];
@@ -128,11 +129,11 @@ app.use(express.urlencoded({ extended: false }));
     serveStatic(app);
   }
 
-  const port = 5000;
+  const port = process.env.PORT || 5000;
   server.listen(
     {
-      port,
-      host: '127.0.0.1',
+      port: Number(port),
+      host: '0.0.0.0', // Listen on all available network interfaces
     },
     () => {
       // Use the main logger for application lifecycle events
