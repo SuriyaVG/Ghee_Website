@@ -12,5 +12,5 @@ cmds = [
     "chmod +x start.sh"
 ]
 
-[phases.start]
+[start]
 cmd = "./start.sh" 
