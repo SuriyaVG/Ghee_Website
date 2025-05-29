@@ -10,4 +10,4 @@ cmds = ["npm ci"]
 cmds = ["npm run build"]
 
 [phases.start]
-cmd = "caddy run --config /app/Caddyfile --adapter caddyfile" 
+cmd = "/app/start.sh" 
