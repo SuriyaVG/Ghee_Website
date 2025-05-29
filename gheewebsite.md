@@ -199,3 +199,43 @@ Here's a summary of the significant changes and fixes applied based on the code 
 11. **Addressed Environment Variable Startup Check:**
     *   The server includes a startup check for essential Cashfree environment variables (`CASHFREE_APP_ID`, `CASHFREE_SECRET_KEY`, `CASHFREE_ENV`).
     *   To facilitate development without actual credentials, guidance was provided to use placeholder values in the `.env` file. This allows the server to start and general site functionality to be tested, though actual payment processing would require valid credentials.
+
+---
+
+## Production Hosting on Railway
+
+### Summary
+As of May 29, 2025, the GheeRoots website has been successfully deployed to Railway. The application is served via Caddy (static frontend) with API requests proxied to the Node.js backend on port 5000.
+
+### Issues Faced
+- Static assets and front-end routes returning 404 due to Caddy configuration
+- `npm: command not found` errors in build, caused by overriding default provider packages in `nixpacks.toml`
+- `start.sh` script not executing (missing execute permission and misplacement under phases)
+- Railway's default start command only launching Caddy, not the backend
+- Incorrect use of `aptPkgs` and custom `nixPkgs` overrides led to build failures
+
+### Attempts and Iterations
+1. Added `start.sh` to launch backend and Caddy in parallel, with logging and `sleep` for initialization
+2. Modified `Caddyfile` to proxy `/api` to `http://localhost:5000` and serve `dist/public` for SPA routing
+3. Configured executable permissions on `start.sh` via `chmod +x start.sh`
+4. Initially added `aptPkgs` and `nixPkgs` to install Node.js and npm, then rolled back after discovering unsupported overrides
+5. Updated `nixpacks.toml`:
+   - Installed dependencies with `npm ci` only
+   - Bundled static files with Vite's `npm run build`
+   - Ensured `start.sh` is executed by moving the start command to the top-level `[start]` section
+6. Removed global `npm` upgrade and custom package manager steps to rely on Nixpacks' Node provider defaults
+7. Monitored Railway build logs; confirmed successful `npm ci`, build, and `chmod +x start.sh`
+8. Pushed commits to GitHub; Railway automatically triggered and completed the deployment
+
+### Outcome
+- The website is now live on Railway with both frontend and backend functioning correctly
+- Static and dynamic routes resolved without 404 errors
+- API endpoints are accessible under `/api` and respond as expected
+- The deployment pipeline is stable and repeatable via `nixpacks.toml` configurations
+
+---
+
+## Next Steps
+- Update this section with production monitoring and performance metrics
+- Document any further Railway environment variables or scaling configurations
+- Plan for CI integration (GitHub Actions) and enable the 'Wait for CI' setting once workflows are in place
