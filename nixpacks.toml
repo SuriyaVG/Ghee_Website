@@ -2,7 +2,6 @@
 
 [phases.setup]
 providers = ["nodejs", "caddy"]
-nixPkgs = ["coreutils"]
 
 [phases.install]
 cmds = ["npm ci"]
