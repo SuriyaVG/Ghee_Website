@@ -1,5 +1,13 @@
-        # nixpacks.toml
-        providers = ["caddy"]
+# nixpacks.toml
 
-        [phases.start]
-        cmd = "caddy run --config /app/Caddyfile --adapter caddyfile"
+[phases.setup]
+providers = ["nodejs", "caddy"]
+
+[phases.install]
+cmds = ["npm ci"]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[phases.start]
+cmd = "caddy run --config /app/Caddyfile --adapter caddyfile" 
