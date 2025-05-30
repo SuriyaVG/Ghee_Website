@@ -16,7 +16,7 @@
     @api_paths path_regexp ^/api(?:$|/.*$)
     handle @api_paths {
         uri strip_prefix /api
-        reverse_proxy http://localhost:5000
+        reverse_proxy http://127.0.0.1:5000
     }
 
     # Handle all other routes
