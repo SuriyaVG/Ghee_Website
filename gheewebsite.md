@@ -239,3 +239,23 @@ As of May 29, 2025, the GheeRoots website has been successfully deployed to Rail
 - Update this section with production monitoring and performance metrics
 - Document any further Railway environment variables or scaling configurations
 - Plan for CI integration (GitHub Actions) and enable the 'Wait for CI' setting once workflows are in place
+
+---
+
+## Post-Deployment Changelog (2025-05-30)
+
+- **Caddy Proxy IPv6 Issue**: API requests were failing with `connection refused` because Caddy resolved `localhost` to IPv6 `::1`. We fixed this by updating the `Caddyfile` to proxy `/api` to `127.0.0.1:5000`.
+
+- **Invalid Arg Type on `import.meta.dirname`**: The production build errored with `ERR_INVALID_ARG_TYPE` when resolving `import.meta.dirname`. We refactored both `server/vite.ts` and `vite.config.ts` to use `fileURLToPath(import.meta.url)` and define `__dirname`.
+
+- **Startup Crash on Missing Cashfree Env Vars**: The backend threw a fatal error if Cashfree credentials were not set. We removed the hard crash and now conditionally register Cashfree payment endpoints only when `CASHFREE_APP_ID`, `CASHFREE_SECRET_KEY`, and `CASHFREE_ENV` are present, logging a warning otherwise.
+
+- **304 Not Modified Caching**: Frontend API calls were returning 304 and no data refresh. We bypassed browser caching by adding `cache: 'no-store'` to the `fetch` options in our React Query setup.
+
+- **Port 5000 in Use (`EADDRINUSE`)**: Local restarts sometimes failed because the port was still bound. We documented using `netstat -ano | findstr :5000` and `taskkill /PID <PID> /F` or `npx kill-port 5000` to free the port.
+
+- **Prefix Stripping Causing 502s**: Caddy's `strip_prefix /api` was rewriting requests so Express routes no longer matched. We removed the `strip_prefix` directive so `/api/*` is forwarded untouched.
+
+- **CSS Minification Warnings**: Build logs showed minor CSS syntax warnings from the `cmdk` utility classes. These are non-blocking and have been noted for a future CSS cleanup pass.
+
+- **Deployment/Development Workflow Clarified**: Documented the steps for rapid local development (`npm run dev:server` + `npm run dev:client`), local production testing (`npm run build` + `npm start` / `start.sh`), and Railway's auto-deploy on git push.
