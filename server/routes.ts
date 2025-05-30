@@ -20,35 +20,29 @@ const validateRequest =
   };
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Check for required Cashfree environment variables
-  if (
-    !process.env.CASHFREE_APP_ID ||
-    !process.env.CASHFREE_SECRET_KEY ||
-    !process.env.CASHFREE_ENV
-  ) {
-    console.error(
-      'FATAL ERROR: Cashfree environment variables (CASHFREE_APP_ID, CASHFREE_SECRET_KEY, CASHFREE_ENV) are not set. Please configure them in your .env file.'
+  // Setup Cashfree integration: payment routes enabled only if env vars are set
+  const hasCashfreeEnv =
+    !!process.env.CASHFREE_APP_ID &&
+    !!process.env.CASHFREE_SECRET_KEY &&
+    !!process.env.CASHFREE_ENV;
+  let cashfreeConfig: { appId: string; secretKey: string; baseUrl: string } | undefined;
+  if (hasCashfreeEnv) {
+    cashfreeConfig = {
+      appId: process.env.CASHFREE_APP_ID!,
+      secretKey: process.env.CASHFREE_SECRET_KEY!,
+      baseUrl:
+        process.env.CASHFREE_ENV === 'production'
+          ? 'https://api.cashfree.com'
+          : 'https://sandbox.cashfree.com',
+    };
+    console.log(
+      `Cashfree Integration: Mode: ${process.env.CASHFREE_ENV}, BaseURL: ${cashfreeConfig.baseUrl}, AppID: Loaded`
     );
-    // For a real app, you might exit or throw a more specific startup error
-    // Throwing a generic error here will be caught by the centralized handler if routes are called before .env is fixed
-    throw new Error(
-      'Server configuration error: Missing required Cashfree credentials or environment setting.'
+  } else {
+    console.warn(
+      'Cashfree environment variables not set. Payment endpoints (/api/create-cashfree-order, /api/verify-cashfree-payment, /api/cashfree-webhook) will be disabled.'
     );
   }
-
-  const cashfreeConfig = {
-    appId: process.env.CASHFREE_APP_ID, // No fallback
-    secretKey: process.env.CASHFREE_SECRET_KEY, // No fallback
-    // Determine baseUrl based on CASHFREE_ENV. Default to sandbox if invalid or not explicitly production.
-    baseUrl:
-      process.env.CASHFREE_ENV === 'production'
-        ? 'https://api.cashfree.com'
-        : 'https://sandbox.cashfree.com', // Default to sandbox for safety if misconfigured
-  };
-
-  console.log(
-    `Cashfree Integration: Mode: ${process.env.CASHFREE_ENV}, BaseURL: ${cashfreeConfig.baseUrl}, AppID: ${cashfreeConfig.appId ? 'Loaded' : 'MISSING!'}`
-  );
 
   // Get all products
   app.get('/api/products', async (req, res, next) => {
@@ -107,61 +101,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create Cashfree order
-  app.post('/api/create-cashfree-order', async (req, res, next) => {
-    try {
-      const { amount, currency = 'INR', customerInfo } = req.body;
+  // Create Cashfree order (only if env vars set)
+  if (hasCashfreeEnv) {
+    app.post('/api/create-cashfree-order', async (req, res, next) => {
+      try {
+        const { amount, currency = 'INR', customerInfo } = req.body;
 
-      if (
-        !amount ||
-        !customerInfo ||
-        !customerInfo.customerName ||
-        !customerInfo.customerEmail ||
-        !customerInfo.customerPhone
-      ) {
-        const err: any = new Error('Missing amount or customer information for Cashfree order.');
-        err.statusCode = 400;
-        return next(err);
+        if (
+          !amount ||
+          !customerInfo ||
+          !customerInfo.customerName ||
+          !customerInfo.customerEmail ||
+          !customerInfo.customerPhone
+        ) {
+          const err: any = new Error('Missing amount or customer information for Cashfree order.');
+          err.statusCode = 400;
+          return next(err);
+        }
+
+        const orderData = {
+          order_id: `order_${Date.now()}`,
+          order_amount: amount,
+          order_currency: currency,
+          customer_details: {
+            customer_id: `customer_${Date.now()}`,
+            customer_name: customerInfo.customerName,
+            customer_email: customerInfo.customerEmail,
+            customer_phone: customerInfo.customerPhone,
+          },
+          order_meta: {
+            return_url: `${req.protocol}://${req.get('host')}/payment-success`,
+            notify_url: `${req.protocol}://${req.get('host')}/api/cashfree-webhook`,
+          },
+        };
+
+        const response = await axios.post(`${cashfreeConfig!.baseUrl}/pg/orders`, orderData, {
+          headers: {
+            'x-api-version': '2022-09-01',
+            'x-client-id': cashfreeConfig!.appId,
+            'x-client-secret': cashfreeConfig!.secretKey,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        res.json({
+          orderId: response.data.order_id,
+          paymentSessionId: response.data.payment_session_id,
+          amount: response.data.order_amount,
+          currency: response.data.order_currency,
+        });
+      } catch (error) {
+        console.error('Cashfree order creation failed in route handler:', error);
+        next(error);
       }
+    });
+  }
 
-      const orderData = {
-        order_id: `order_${Date.now()}`,
-        order_amount: amount,
-        order_currency: currency,
-        customer_details: {
-          customer_id: `customer_${Date.now()}`,
-          customer_name: customerInfo.customerName,
-          customer_email: customerInfo.customerEmail,
-          customer_phone: customerInfo.customerPhone,
-        },
-        order_meta: {
-          return_url: `${req.protocol}://${req.get('host')}/payment-success`,
-          notify_url: `${req.protocol}://${req.get('host')}/api/cashfree-webhook`,
-        },
-      };
-
-      const response = await axios.post(`${cashfreeConfig.baseUrl}/pg/orders`, orderData, {
-        headers: {
-          'x-api-version': '2022-09-01',
-          'x-client-id': cashfreeConfig.appId,
-          'x-client-secret': cashfreeConfig.secretKey,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      res.json({
-        orderId: response.data.order_id,
-        paymentSessionId: response.data.payment_session_id,
-        amount: response.data.order_amount,
-        currency: response.data.order_currency,
-      });
-    } catch (error) {
-      console.error('Cashfree order creation failed in route handler:', error);
-      next(error);
-    }
-  });
-
-  // Verify Cashfree payment & Create Order in DB
+  // Verify Cashfree payment & Create Order in DB (only if env vars set)
   app.post('/api/verify-cashfree-payment', async (req, res, next) => {
     try {
       const {
@@ -179,12 +175,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const cashfreeOrderDetailsResponse = await axios.get(
-        `${cashfreeConfig.baseUrl}/pg/orders/${cashfreeOrderId}`,
+        `${cashfreeConfig!.baseUrl}/pg/orders/${cashfreeOrderId}`,
         {
           headers: {
             'x-api-version': '2022-09-01', // Ensure this is the latest or correct version
-            'x-client-id': cashfreeConfig.appId,
-            'x-client-secret': cashfreeConfig.secretKey,
+            'x-client-id': cashfreeConfig!.appId,
+            'x-client-secret': cashfreeConfig!.secretKey,
           },
         }
       );
@@ -200,11 +196,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // 2. Verify Amount (crucial security check)
-      // Cashfree amounts are in paisa if not specified, ensure consistency or convert.
-      // Assuming your 'total' is in the base currency unit (e.g., Rupees)
-      // and Cashfree's order_amount is also in the base currency unit.
-      // If Cashfree returns paisa, and your total is rupees, you must convert for comparison.
-      // For now, assuming they are in the same unit as per your create-cashfree-order logic.
       if (parseFloat(cfOrderData.order_amount) !== parseFloat(total)) {
         console.warn('Amount mismatch during verification!', {
           cfAmount: cfOrderData.order_amount,
@@ -260,7 +251,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Cashfree Webhook Handler
+  // Cashfree Webhook Handler (only if env vars set)
   app.post('/api/cashfree-webhook', async (req, res, next) => {
     const receivedSignature = req.body.signature; // Assuming signature is in the body
     const webhookPayload = { ...req.body };
@@ -293,7 +284,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // 3. Create HMAC SHA256 hash
-      const hmac = crypto.createHmac('sha256', cashfreeConfig.secretKey);
+      const hmac = crypto.createHmac('sha256', cashfreeConfig!.secretKey);
       hmac.update(payloadToSign);
       const computedSignature = hmac.digest('base64');
 
