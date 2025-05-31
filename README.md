@@ -1,5 +1,20 @@
 # GSR Heritage Ghee - E-commerce Website
 
+## Documentation
+For detailed architectural and feature documentation, refer to [gheewebsite.md](gheewebsite.md).
+
+## Table of Contents
+- [Project Overview](#project-overview)
+- [Core Features Implemented](#core-features-implemented)
+- [Getting Started](#getting-started)
+- [Available Scripts](#available-scripts)
+- [Project Structure](#project-structure)
+- [Key Technologies & Libraries](#key-technologies--libraries)
+- [Future Development & Considerations](#future-development--considerations)
+- [Environment Variables](#environment-variables)
+- [Contributing](#contributing)
+- [License](#license)
+
 This is a professional e-commerce website for GSR, a trusted family-owned ghee (clarified butter) business with 50 years of heritage. It showcases their product line, brand story, and allows customers to order products.
 
 ## Project Overview
@@ -164,6 +179,13 @@ The following environment variables are used or will be needed:
 *   `CASHFREE_ENV`: Set to `sandbox` for testing or `production` for live payments.
 *   (For Persistent DB) `DATABASE_URL`: Connection string for your PostgreSQL database.
 
----
+## Contributing
+Contributions are welcome! Please open issues or pull requests. Before submitting, ensure you run:
 
-This README should provide a good starting point for anyone working on the project. 
+```bash
+npm run lint:fix
+npm run format
+```
+
+## License
+This project is licensed under the MIT License. See the LICENSE file for details. 

@@ -1,5 +1,18 @@
 # GheeRoots Website Documentation
 
+## Table of Contents
+- [Project Overview](#project-overview)
+- [Major Features Added](#major-features-added)
+- [Database Schema (Current)](#database-schema-current)
+- [Migrations](#migrations)
+- [Issues Faced & Resolutions](#issues-faced--resolutions)
+- [Getting Started](#getting-started)
+- [Roadmap](#roadmap)
+- [Post-Code Review 1.0 Fixes](#post-code-review-10-fixes)
+- [Production Hosting on Railway](#production-hosting-on-railway)
+- [Railway Roadmap](#railway-roadmap)
+- [Post-Deployment Changelog (2025-05-30)](#post-deployment-changelog-2025-05-30)
+
 ## Project Overview
 GheeRoots is a professional e-commerce website for GSR, a family-owned ghee business. The site features a product showcase, company history, contact information, and a robust ordering system. The project is structured with `client`, `server`, and `shared` directories. The client uses React/TypeScript and Vite.
 
@@ -92,6 +105,7 @@ GheeRoots is a professional e-commerce website for GSR, a family-owned ghee busi
 
 ---
 
+## Getting Started
 ## How to Preview Locally
 - Start the backend: `npm run dev:server`
 - Start the frontend: `npm run dev:client`
@@ -99,6 +113,7 @@ GheeRoots is a professional e-commerce website for GSR, a family-owned ghee busi
 
 ---
 
+## Roadmap
 ## Next Steps
 - Continue to document all schema changes and migrations here.
 - Update this file after every major feature or milestone.
@@ -235,6 +250,7 @@ As of May 29, 2025, the GheeRoots website has been successfully deployed to Rail
 
 ---
 
+## Railway Roadmap
 ## Next Steps
 - Update this section with production monitoring and performance metrics
 - Document any further Railway environment variables or scaling configurations
