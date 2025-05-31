@@ -171,6 +171,8 @@ This is a professional e-commerce website for GSR, a trusted family-owned ghee (
 
 ## Environment Variables
 
+Before running, copy `.env.example` to `.env` and fill in your values.
+
 The following environment variables are used or will be needed:
 
 *   `NODE_ENV`: Set to `development` or `production`.
