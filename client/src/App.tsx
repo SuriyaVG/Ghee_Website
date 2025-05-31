@@ -1,12 +1,15 @@
+import React, { Suspense, lazy } from 'react';
 import { Switch, Route } from 'wouter';
 import { queryClient } from './lib/queryClient';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import Home from '@/pages/home';
-import CartPage from '@/pages/cart';
-import PaymentSuccessPage from '@/pages/payment-success';
-import NotFound from '@/pages/not-found';
+
+// Lazy-loaded pages for code-splitting
+const Home = lazy(() => import('@/pages/home'));
+const CartPage = lazy(() => import('@/pages/cart'));
+const PaymentSuccessPage = lazy(() => import('@/pages/payment-success'));
+const NotFound = lazy(() => import('@/pages/not-found'));
 
 function Router() {
   return (
@@ -25,7 +28,9 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
-        <Router />
+        <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
+          <Router />
+        </Suspense>
       </TooltipProvider>
     </QueryClientProvider>
   );

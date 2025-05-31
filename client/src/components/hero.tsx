@@ -35,7 +35,7 @@ export function Hero() {
             <div className="flex flex-col sm:flex-row gap-4">
               <Button
                 onClick={() => scrollToSection('products')}
-                className="hover:bg-rich-brown transition-colors shadow-lg px-8 py-4 text-lg text-[#0a0a0a] bg-[#1f000000]"
+                className="bg-warm-gold text-white hover:bg-rich-brown transition-colors shadow-lg px-8 py-4 text-lg"
               >
                 <ShoppingBag className="w-5 h-5 mr-2" />
                 Shop Now
