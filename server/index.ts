@@ -134,7 +134,7 @@ async function startApp(): Promise<http.Server> {
 
   await registerRoutes(app); // Register routes first
 
-  const backendPort = process.env.PORT || 5000;
+  const backendPort = 5000; // Always use port 5000 internally
   
   return new Promise(async (resolve) => {
     const server = http.createServer(app); // Create server with the app
