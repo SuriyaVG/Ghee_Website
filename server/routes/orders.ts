@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { storage } from '../storage';
 import { validateRequest } from '../middleware/validateRequest';
-import { insertOrderSchema } from '@shared/schema';
+import { insertOrderSchema } from '@shared/schemas/orders';
 
 const router = Router();
 

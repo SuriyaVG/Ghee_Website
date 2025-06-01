@@ -60,26 +60,26 @@ export function Products() {
 
   if (isLoading) {
     return (
-      <section id="products" className="py-20 bg-white">
+      <section id="products" className="py-20 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-playfair font-bold text-deep-brown mb-4">
+            <h2 className="text-4xl font-playfair font-bold text-primary mb-4">
               Our Premium Ghee Collection
             </h2>
-            <p className="text-xl text-deep-brown/70 max-w-3xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
               Loading our carefully crafted range of pure ghee...
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[1, 2, 3].map((i) => (
-              <Card key={i} className="animate-pulse">
+              <Card key={i} className="animate-pulse bg-card border-border">
                 <CardContent className="p-8">
-                  <div className="bg-gray-200 h-48 rounded-xl mb-6"></div>
+                  <div className="bg-muted h-48 rounded-xl mb-6"></div>
                   <div className="space-y-4">
-                    <div className="h-6 bg-gray-200 rounded"></div>
-                    <div className="h-4 bg-gray-200 w-3/4 rounded"></div>
-                    <div className="h-6 bg-gray-200 w-1/2 rounded"></div>
-                    <div className="h-10 bg-gray-200 rounded"></div>
+                    <div className="h-6 bg-muted rounded"></div>
+                    <div className="h-4 bg-muted w-3/4 rounded"></div>
+                    <div className="h-6 bg-muted w-1/2 rounded"></div>
+                    <div className="h-10 bg-muted rounded"></div>
                   </div>
                 </CardContent>
               </Card>
@@ -91,19 +91,19 @@ export function Products() {
   }
 
   return (
-    <section id="products" className="py-20 bg-white">
+    <section id="products" className="py-20 bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-playfair font-bold text-deep-brown mb-4">
+          <h2 className="text-4xl font-playfair font-bold text-primary mb-4">
             Our Premium Ghee Collection
           </h2>
-          <p className="text-xl text-deep-brown/70 max-w-3xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Choose from our carefully crafted range of pure ghee, available in convenient sizes to
             meet your family&apos;s needs.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 mb-16">
+        <div className="max-w-lg mx-auto grid grid-cols-1 gap-12 mb-16">
           {productsData?.map((product) => {
             const currentSelectedVariantId =
               selectedVariants[product.id] || product.variants[0]?.id;
@@ -117,7 +117,7 @@ export function Products() {
             return (
               <Card
                 key={product.id}
-                className="bg-cream-bg shadow-lg hover:shadow-xl transition-all duration-300 border border-warm-gold/20 group flex flex-col"
+                className="bg-card shadow-lg hover:shadow-xl transition-all duration-300 border border-border/60 group flex flex-col"
               >
                 <CardContent className="p-6 flex flex-col flex-grow">
                   <div className="relative mb-6">
@@ -128,24 +128,24 @@ export function Products() {
                       loading="lazy"
                     />
                     {product.is_popular && (
-                      <Badge className="absolute top-3 right-3 bg-butter-yellow text-deep-brown font-semibold">
+                      <Badge className="absolute top-3 right-3 bg-accent text-accent-foreground font-semibold">
                         Popular
                       </Badge>
                     )}
                     {currentVariant?.best_value_badge && (
-                      <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-warm-gold text-white px-4 py-1.5 rounded-full text-xs font-medium shadow-lg">
+                      <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary text-primary-foreground px-4 py-1.5 rounded-full text-xs font-medium shadow-lg">
                         {currentVariant.best_value_badge}
                       </div>
                     )}
                   </div>
                   <div className="space-y-3 flex flex-col flex-grow">
-                    <h3 className="text-2xl font-playfair font-bold text-deep-brown">
+                    <h3 className="text-2xl font-playfair font-bold text-foreground">
                       {product.name}
                     </h3>
-                    <p className="text-deep-brown/70 text-sm flex-grow">{product.description}</p>
+                    <p className="text-muted-foreground text-sm flex-grow">{product.description}</p>
 
                     <div className="mt-4 mb-2">
-                      <Label className="text-md font-medium text-deep-brown mb-2 block">
+                      <Label className="text-md font-medium text-foreground mb-2 block">
                         Select Size:
                       </Label>
                       <RadioGroup
@@ -160,8 +160,8 @@ export function Products() {
                             className={`flex items-center justify-center px-4 py-2 border rounded-lg cursor-pointer text-sm font-medium 
                                         ${
                                           currentSelectedVariantId === variant.id
-                                            ? 'bg-warm-gold text-white border-warm-gold'
-                                            : 'bg-white text-deep-brown border-warm-gold/30 hover:border-warm-gold'
+                                            ? 'bg-primary text-primary-foreground border-primary'
+                                            : 'bg-background text-foreground border-border hover:border-primary hover:bg-accent hover:text-accent-foreground'
                                         }`}
                           >
                             <RadioGroupItem
@@ -176,17 +176,17 @@ export function Products() {
                     </div>
 
                     <div className="flex items-center justify-between pt-2">
-                      <div className="text-3xl font-playfair font-bold text-warm-gold">
+                      <div className="text-3xl font-playfair font-bold text-primary">
                         ₹{displayPrice}
                       </div>
                       {currentVariant && (
-                        <div className="text-sm text-deep-brown/60">for {currentVariant.size}</div>
+                        <div className="text-sm text-muted-foreground">for {currentVariant.size}</div>
                       )}
                     </div>
                   </div>
                   <Button
                     onClick={() => handleAddToCart(product, currentSelectedVariantId)}
-                    className="w-full mt-auto bg-warm-gold text-white hover:bg-rich-brown transition-colors py-3"
+                    className="w-full mt-auto bg-primary text-primary-foreground hover:bg-primary/90 transition-colors py-3"
                   >
                     <ShoppingCart className="w-4 h-4 mr-2" />
                     Add to Cart
@@ -197,38 +197,38 @@ export function Products() {
           })}
         </div>
 
-        <div className="bg-gradient-to-r from-warm-gold/10 to-butter-yellow/10 rounded-2xl p-8">
-          <h3 className="text-2xl font-playfair font-bold text-deep-brown text-center mb-8">
+        <div className="bg-secondary/20 rounded-2xl p-8">
+          <h3 className="text-2xl font-playfair font-bold text-foreground text-center mb-8">
             Why Choose GSR Ghee?
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div className="text-center space-y-3">
-              <div className="w-16 h-16 bg-warm-gold rounded-full flex items-center justify-center mx-auto">
-                <Leaf className="text-white w-8 h-8" />
+              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto">
+                <Leaf className="text-primary-foreground w-8 h-8" />
               </div>
-              <h4 className="font-playfair font-bold text-deep-brown">100% Natural</h4>
-              <p className="text-sm text-deep-brown/70">No preservatives or artificial additives</p>
+              <h4 className="font-playfair font-bold text-foreground">100% Natural</h4>
+              <p className="text-sm text-muted-foreground">No preservatives or artificial additives</p>
             </div>
             <div className="text-center space-y-3">
-              <div className="w-16 h-16 bg-warm-gold rounded-full flex items-center justify-center mx-auto">
-                <Flame className="text-white w-8 h-8" />
+              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto">
+                <Flame className="text-primary-foreground w-8 h-8" />
               </div>
-              <h4 className="font-playfair font-bold text-deep-brown">Traditional Method</h4>
-              <p className="text-sm text-deep-brown/70">Made using time-honored techniques</p>
+              <h4 className="font-playfair font-bold text-foreground">Traditional Method</h4>
+              <p className="text-sm text-muted-foreground">Made using time-honored techniques</p>
             </div>
             <div className="text-center space-y-3">
-              <div className="w-16 h-16 bg-warm-gold rounded-full flex items-center justify-center mx-auto">
-                <Heart className="text-white w-8 h-8" />
+              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto">
+                <Heart className="text-primary-foreground w-8 h-8" />
               </div>
-              <h4 className="font-playfair font-bold text-deep-brown">Family Recipe</h4>
-              <p className="text-sm text-deep-brown/70">50 years of perfected process</p>
+              <h4 className="font-playfair font-bold text-foreground">Family Recipe</h4>
+              <p className="text-sm text-muted-foreground">50 years of perfected process</p>
             </div>
             <div className="text-center space-y-3">
-              <div className="w-16 h-16 bg-warm-gold rounded-full flex items-center justify-center mx-auto">
-                <Award className="text-white w-8 h-8" />
+              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center mx-auto">
+                <Award className="text-primary-foreground w-8 h-8" />
               </div>
-              <h4 className="font-playfair font-bold text-deep-brown">Quality Assured</h4>
-              <p className="text-sm text-deep-brown/70">Rigorous quality testing</p>
+              <h4 className="font-playfair font-bold text-foreground">Quality Assured</h4>
+              <p className="text-sm text-muted-foreground">Rigorous quality testing</p>
             </div>
           </div>
         </div>

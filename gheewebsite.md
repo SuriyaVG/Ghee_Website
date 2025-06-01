@@ -114,7 +114,6 @@ GheeRoots is a professional e-commerce website for GSR, a family-owned ghee busi
 ---
 
 ## Roadmap
-## Next Steps
 - Continue to document all schema changes and migrations here.
 - Update this file after every major feature or milestone.
 
@@ -251,7 +250,6 @@ As of May 29, 2025, the GheeRoots website has been successfully deployed to Rail
 ---
 
 ## Railway Roadmap
-## Next Steps
 - Update this section with production monitoring and performance metrics
 - Document any further Railway environment variables or scaling configurations
 - Plan for CI integration (GitHub Actions) and enable the 'Wait for CI' setting once workflows are in place

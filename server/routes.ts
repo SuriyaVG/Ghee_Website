@@ -2,7 +2,8 @@ import type { Express, Request, Response, NextFunction } from 'express';
 import { type AnyZodObject } from 'zod';
 import { createServer, type Server } from 'http';
 import { storage } from './storage';
-import { insertOrderSchema, insertContactSchema } from '@shared/schema';
+import { insertOrderSchema } from '@shared/schemas/orders';
+import { insertContactSchema } from '@shared/schemas/contacts';
 import axios from 'axios';
 // Domain-specific routers
 import productsRouter from './routes/products';

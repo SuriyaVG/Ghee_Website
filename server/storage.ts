@@ -53,9 +53,9 @@ export class MemStorage implements IStorage {
   private initializeProductsAndVariants() {
     const mainProduct: Product = {
       id: this.currentProductId++,
-      name: 'Pure Desi Ghee',
+      name: 'Pure Ghee',
       description:
-        'Crafted with 50 years of tradition, our Pure Desi Ghee is made from the finest quality milk, churned to perfection to bring you an authentic taste and aroma. Ideal for cooking, medicinal purposes, and religious ceremonies.',
+        'Crafted with 50 years of tradition, our Pure Ghee is made from the finest quality milk, churned to perfection to bring you an authentic taste and aroma. Ideal for cooking, medicinal purposes, and religious ceremonies.',
       is_popular: true,
     };
     this.products.set(mainProduct.id, mainProduct);
