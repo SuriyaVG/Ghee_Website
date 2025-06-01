@@ -127,13 +127,13 @@ export function Products() {
                       className="w-full h-56 object-cover rounded-xl group-hover:scale-105 transition-transform duration-300"
                       loading="lazy"
                     />
-                    {product.is_popular && (
+                    {/* {product.is_popular && (
                       <Badge className="absolute top-3 right-3 bg-accent text-accent-foreground font-semibold">
                         Popular
                       </Badge>
-                    )}
+                    )} */}
                     {currentVariant?.best_value_badge && (
-                      <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary text-primary-foreground px-4 py-1.5 rounded-full text-xs font-medium shadow-lg">
+                      <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-primary text-primary-foreground px-4 py-2 rounded-full text-sm font-bold shadow-lg">
                         {currentVariant.best_value_badge}
                       </div>
                     )}

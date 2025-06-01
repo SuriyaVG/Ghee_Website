@@ -12,6 +12,7 @@
 - [Production Hosting on Railway](#production-hosting-on-railway)
 - [Railway Roadmap](#railway-roadmap)
 - [Post-Deployment Changelog (2025-05-30)](#post-deployment-changelog-2025-05-30)
+- [API Testing with Vitest & Supertest](#api-testing-with-vitest--supertest)
 
 ## Project Overview
 GheeRoots is a professional e-commerce website for GSR, a family-owned ghee business. The site features a product showcase, company history, contact information, and a robust ordering system. The project is structured with `client`, `server`, and `shared` directories. The client uses React/TypeScript and Vite.
@@ -110,6 +111,25 @@ GheeRoots is a professional e-commerce website for GSR, a family-owned ghee busi
 - Start the backend: `npm run dev:server`
 - Start the frontend: `npm run dev:client`
 - Visit: [http://localhost:5000/](http://localhost:5000/)
+
+---
+
+## API Testing with Vitest & Supertest
+
+The project utilizes Vitest as its test runner and Supertest for making HTTP assertions against the API endpoints. This setup is crucial for ensuring the reliability and correctness of the backend services, helping to catch regressions and validate functionality as the codebase evolves.
+
+### Test File Location and Naming
+
+Test files are typically located alongside the code they are testing, or in a dedicated `__tests__` subdirectory. For API tests, they are generally found within the `server/` directory (e.g., `server/routes/your-route.test.ts` or `server/tests/your-route.spec.ts`). Test files follow the naming convention `*.test.ts` or `*.spec.ts` as defined in `vitest.config.ts`.
+
+### Running Tests
+
+To execute the test suite, use the following npm scripts:
+
+- `npm test`: Runs all tests once and exits. Ideal for CI environments or a one-off check.
+- `npm run test:watch`: Runs tests in watch mode, automatically re-running them when files change. Useful during development.
+
+Configuration for Vitest can be found in `vitest.config.ts`.
 
 ---
 
@@ -273,3 +293,11 @@ As of May 29, 2025, the GheeRoots website has been successfully deployed to Rail
 - **CSS Minification Warnings**: Build logs showed minor CSS syntax warnings from the `cmdk` utility classes. These are non-blocking and have been noted for a future CSS cleanup pass.
 
 - **Deployment/Development Workflow Clarified**: Documented the steps for rapid local development (`npm run dev:server` + `npm run dev:client`), local production testing (`npm run build` + `npm start` / `start.sh`), and Railway's auto-deploy on git push.
+
+---
+
+## Post-Deployment Changelog (2025-06-01)
+
+- **Railway Port Conflict (`EADDRINUSE`)**: Resolved an "address already in use" error on Railway. The Node.js backend was incorrectly using `process.env.PORT` (e.g., 8080), which conflicted with Caddy. Modified `server/index.ts` to ensure the backend consistently listens on an internal port `5000`, allowing Caddy to manage the public-facing port `$PORT` and proxy requests correctly. This stabilized the Railway deployment.
+
+- **Missing WhatsApp Icon (502 Error)**: Fixed a 502 Bad Gateway error for `/images/whatsapp-icon.svg`. The icon file was missing from `client/public/images/`. Added the `whatsapp-icon.svg` to the correct directory, ensuring it gets included in the build and served properly by Caddy.
