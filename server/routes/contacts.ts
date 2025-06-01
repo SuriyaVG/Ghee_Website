@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { storage } from '../storage';
 import { validateRequest } from '../middleware/validateRequest';
-import { insertContactSchema } from '@shared/schema';
+import { insertContactSchema } from '@shared/schemas/contacts';
 
 const router = Router();
 

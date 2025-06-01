@@ -4,86 +4,110 @@
 @tailwind utilities;
 
 :root {
-  /* Modern Blue Theme */
-  --background: 210 40% 98%; /* #F8FAFC light blue-gray */
-  --foreground: 222 84% 15%; /* #1E293B dark slate */
-  --muted: 210 40% 96%; /* lighter blue-gray */
-  --muted-foreground: 215 16% 47%; /* muted slate */
-  --popover: 0 0% 100%; /* white */
-  --popover-foreground: 222 84% 15%; /* #1E293B dark slate */
-  --card: 0 0% 100%; /* white */
-  --card-foreground: 222 84% 15%; /* #1E293B dark slate */
-  --border: 214 32% 91%; /* light blue border */
-  --input: 214 32% 91%; /* light blue border */
-  --primary: 221 83% 53%; /* #3B82F6 blue */
-  --primary-foreground: 0 0% 100%; /* white */
-  --secondary: 210 40% 96%; /* light blue-gray */
-  --secondary-foreground: 222 84% 15%; /* dark slate */
-  --accent: 217 91% 60%; /* #60A5FA light blue */
-  --accent-foreground: 222 84% 15%; /* dark slate */
-  --destructive: 0 84% 60%; /* red */
-  --destructive-foreground: 0 0% 98%; /* white */
-  --ring: 221 83% 53%; /* #3B82F6 blue */
+  /* Pouch-inspired Theme - NOW THE DEFAULT */
+  --background: 45 33% 92%; /* Creamy Beige from pouch body e.g. #F2EBE5 */
+  --foreground: 30 25% 10%; /* Dark Brown/Off-Black from pouch text e.g. #2A221B */
+  --muted: 45 33% 88%; /* Lighter creamy beige */
+  --muted-foreground: 30 25% 30%; /* Muted dark brown */
+  --popover: 45 40% 95%; /* Slightly off-white for popovers, e.g. #F5F2EF */
+  --popover-foreground: 30 25% 10%;
+  --card: 45 40% 95%; /* Card background e.g. #F5F2EF */
+  --card-foreground: 30 25% 10%;
+  --border: 35 45% 75%; /* Gold/Bronze border e.g. #D4B790 */
+  --input: 35 45% 75%;
+  --primary: 35 50% 55%; /* Rich Gold/Bronze for primary actions e.g. #C8A365 */
+  --primary-foreground: 30 25% 8%; /* Very dark brown for text on primary e.g. #211B15 */
+  --secondary: 35 40% 70%; /* Lighter Gold/Bronze for secondary elements e.g. #C2A984 */
+  --secondary-foreground: 30 25% 10%;
+  --accent: 35 60% 50%; /* Brighter Gold for accents e.g. #D9A44D */
+  --accent-foreground: 30 25% 8%; 
+  --destructive: 0 70% 50%; /* A suitable red */
+  --destructive-foreground: 0 0% 100%; /* white for destructive button text */
+  --ring: 35 50% 55%; /* Ring color matching primary */
   --radius: 0.5rem;
   
-  /* Custom GSR colors - Blue Theme */
-  --primary-blue: 221 83% 53%; /* #3B82F6 */
-  --secondary-blue: 217 91% 60%; /* #60A5FA */
-  --dark-slate: 222 84% 15%; /* #1E293B */
-  --light-bg: 210 40% 98%; /* #F8FAFC */
-  --accent-cyan: 199 89% 48%; /* #0EA5E9 */
+  /* Custom GSR colors from Pouch - can be used alongside or instead of semantic ones if needed */
+  --pouch-cream: 45 33% 92%;   /* #F2EBE5 */
+  --pouch-gold: 35 50% 55%;    /* #C8A365 */
+  --pouch-dark-text: 30 25% 10%;/* #2A221B */
+  --pouch-accent-gold: 35 60% 50%; /* #D9A44D */
+  --pouch-border: 35 45% 75%;   /* #D4B790 */
+
+  /* Old Modern Blue Theme - Commented out or can be removed */
+  /*
+  --background: 210 40% 98%; 
+  --foreground: 222 84% 15%; 
+  --muted: 210 40% 96%; 
+  --muted-foreground: 215 16% 47%; 
+  --popover: 0 0% 100%; 
+  --popover-foreground: 222 84% 15%; 
+  --card: 0 0% 100%; 
+  --card-foreground: 222 84% 15%; 
+  --border: 214 32% 91%; 
+  --input: 214 32% 91%; 
+  --primary: 221 83% 53%; 
+  --primary-foreground: 0 0% 100%; 
+  --secondary: 210 40% 96%; 
+  --secondary-foreground: 222 84% 15%; 
+  --accent: 217 91% 60%; 
+  --accent-foreground: 222 84% 15%; 
+  --destructive: 0 84% 60%; 
+  --destructive-foreground: 0 0% 98%; 
+  --ring: 221 83% 53%; 
+  */
 }
 
-/* Alternative: Original Heritage Theme */
+/* Alternative: Original Heritage Theme - This class definition can be removed if :root is now the heritage theme */
+/* 
 .heritage-theme {
-  --background: 45 100% 97%; /* #FFF8E7 cream background */
-  --foreground: 25 42% 12%; /* #2C1810 deep brown */
-  --muted: 45 100% 95%; /* lighter cream */
-  --muted-foreground: 25 20% 45%; /* muted brown */
-  --popover: 0 0% 100%; /* white */
-  --popover-foreground: 25 42% 12%; /* #2C1810 deep brown */
-  --card: 0 0% 100%; /* white */
-  --card-foreground: 25 42% 12%; /* #2C1810 deep brown */
-  --border: 39 30% 80%; /* warm border */
-  --input: 39 30% 80%; /* warm border */
-  --primary: 39 30% 61%; /* #C5A572 warm gold */
-  --primary-foreground: 0 0% 100%; /* white */
-  --secondary: 45 100% 95%; /* light cream */
-  --secondary-foreground: 25 42% 12%; /* #2C1810 deep brown */
-  --accent: 39 100% 65%; /* #FFB74D butter yellow */
-  --accent-foreground: 25 42% 12%; /* #2C1810 deep brown */
-  --destructive: 0 84% 60%; /* red */
-  --destructive-foreground: 0 0% 98%; /* white */
-  --ring: 39 30% 61%; /* #C5A572 warm gold */
+  --background: 45 33% 92%; 
+  --foreground: 30 25% 10%; 
+  --muted: 45 33% 88%; 
+  --muted-foreground: 30 25% 30%; 
+  --popover: 45 40% 95%; 
+  --popover-foreground: 30 25% 10%;
+  --card: 45 40% 95%; 
+  --card-foreground: 30 25% 10%;
+  --border: 35 45% 75%; 
+  --input: 35 45% 75%;
+  --primary: 35 50% 55%; 
+  --primary-foreground: 30 25% 8%; 
+  --secondary: 35 40% 70%; 
+  --secondary-foreground: 30 25% 10%;
+  --accent: 35 60% 50%; 
+  --accent-foreground: 30 25% 8%; 
+  --destructive: 0 70% 50%; 
+  --destructive-foreground: 0 0% 100%;
+  --ring: 35 50% 55%; 
   
-  /* Custom GSR colors */
-  --warm-gold: 39 30% 61%; /* #C5A572 */
-  --rich-brown: 25 55% 31%; /* #8B4513 */
-  --cream-bg: 45 100% 97%; /* #FFF8E7 */
-  --deep-brown: 25 42% 12%; /* #2C1810 */
-  --butter-yellow: 39 100% 65%; /* #FFB74D */
+  --pouch-cream: 45 33% 92%;
+  --pouch-gold: 35 50% 55%; 
+  --pouch-dark-text: 30 25% 10%;
+  --pouch-accent-gold: 35 60% 50%; 
+  --pouch-border: 35 45% 75%;
 }
+*/
 
-.dark {
-  --background: 25 42% 12%; /* #2C1810 deep brown */
-  --foreground: 45 100% 97%; /* #FFF8E7 cream */
-  --muted: 25 30% 20%; /* darker brown */
-  --muted-foreground: 45 80% 80%; /* light cream */
-  --popover: 25 42% 12%; /* #2C1810 deep brown */
-  --popover-foreground: 45 100% 97%; /* #FFF8E7 cream */
-  --card: 25 42% 12%; /* #2C1810 deep brown */
-  --card-foreground: 45 100% 97%; /* #FFF8E7 cream */
-  --border: 25 30% 25%; /* dark brown border */
-  --input: 25 30% 25%; /* dark brown border */
-  --primary: 39 30% 61%; /* #C5A572 warm gold */
-  --primary-foreground: 0 0% 100%; /* white */
-  --secondary: 25 30% 20%; /* darker brown */
-  --secondary-foreground: 45 100% 97%; /* #FFF8E7 cream */
-  --accent: 39 100% 65%; /* #FFB74D butter yellow */
-  --accent-foreground: 25 42% 12%; /* #2C1810 deep brown */
-  --destructive: 0 62% 30%; /* dark red */
-  --destructive-foreground: 0 0% 98%; /* white */
-  --ring: 39 30% 61%; /* #C5A572 warm gold */
+.dark { /* Dark theme can remain as an alternative if desired */
+  --background: 25 42% 12%; 
+  --foreground: 45 100% 97%; 
+  --muted: 25 30% 20%; 
+  --muted-foreground: 45 80% 80%; 
+  --popover: 25 42% 12%; 
+  --popover-foreground: 45 100% 97%; 
+  --card: 25 42% 12%; 
+  --card-foreground: 45 100% 97%; 
+  --border: 25 30% 25%; 
+  --input: 25 30% 25%; 
+  --primary: 39 30% 61%; 
+  --primary-foreground: 0 0% 100%; 
+  --secondary: 25 30% 20%; 
+  --secondary-foreground: 45 100% 97%; 
+  --accent: 39 100% 65%; 
+  --accent-foreground: 25 42% 12%; 
+  --destructive: 0 62% 30%; 
+  --destructive-foreground: 0 0% 98%; 
+  --ring: 39 30% 61%; 
 }
 
 @layer base {
@@ -92,7 +116,8 @@
   }
 
   body {
-    @apply font-sans antialiased text-foreground;
+    /* Ensure body picks up the new :root variables for background and foreground */
+    @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Lato', sans-serif;
   }
   
@@ -112,9 +137,12 @@
     @apply transition-transform duration-300 ease-in-out;
   }
 
+  /* This rule can be removed as .heritage-theme class is no longer needed to activate the theme */
+  /* 
   .heritage-theme body {
-    background-image: linear-gradient(to bottom right, hsl(var(--cream-bg)), hsl(var(--warm-gold) / 0.3));
+    background-color: hsl(var(--background));
   }
+  */
 }
 
 @layer utilities {
@@ -126,117 +154,37 @@
     font-family: 'Lato', sans-serif;
   }
   
-  /* Blue Theme Utilities */
-  .text-primary-blue {
-    color: hsl(var(--primary-blue));
+  /* New Pouch Theme Utilities - can be kept for specific overrides if needed,
+     but primary styling should rely on semantic vars like bg-primary, text-foreground etc. */
+  .text-pouch-gold {
+    color: hsl(var(--pouch-gold));
   }
   
-  .text-secondary-blue {
-    color: hsl(var(--secondary-blue));
+  .text-pouch-dark-text {
+    color: hsl(var(--pouch-dark-text));
   }
   
-  .text-dark-slate {
-    color: hsl(var(--dark-slate));
+  .text-pouch-accent-gold {
+    color: hsl(var(--pouch-accent-gold));
   }
   
-  .text-accent-cyan {
-    color: hsl(var(--accent-cyan));
+  .bg-pouch-cream {
+    background-color: hsl(var(--pouch-cream));
   }
   
-  .bg-primary-blue {
-    background-color: hsl(var(--primary-blue));
+  .bg-pouch-gold {
+    background-color: hsl(var(--pouch-gold));
   }
   
-  .bg-secondary-blue {
-    background-color: hsl(var(--secondary-blue));
+  .border-pouch-border {
+    border-color: hsl(var(--pouch-border));
   }
   
-  .bg-dark-slate {
-    background-color: hsl(var(--dark-slate));
+  .hover\:bg-pouch-accent-gold:hover {
+    background-color: hsl(var(--pouch-accent-gold));
   }
   
-  .bg-light-bg {
-    background-color: hsl(var(--light-bg));
-  }
-  
-  .bg-accent-cyan {
-    background-color: hsl(var(--accent-cyan));
-  }
-  
-  .border-primary-blue {
-    border-color: hsl(var(--primary-blue));
-  }
-  
-  .border-secondary-blue {
-    border-color: hsl(var(--secondary-blue));
-  }
-  
-  .hover\:bg-primary-blue:hover {
-    background-color: hsl(var(--primary-blue));
-  }
-  
-  .hover\:bg-secondary-blue:hover {
-    background-color: hsl(var(--secondary-blue));
-  }
-  
-  .hover\:text-primary-blue:hover {
-    color: hsl(var(--primary-blue));
-  }
-
-  /* Heritage Theme Utilities (for switching back) */
-  .text-warm-gold {
-    color: hsl(var(--warm-gold));
-  }
-  
-  .text-rich-brown {
-    color: hsl(var(--rich-brown));
-  }
-  
-  .text-deep-brown {
-    color: hsl(var(--deep-brown));
-  }
-  
-  .text-butter-yellow {
-    color: hsl(var(--butter-yellow));
-  }
-  
-  .bg-warm-gold {
-    background-color: hsl(var(--warm-gold));
-  }
-  
-  .bg-rich-brown {
-    background-color: hsl(var(--rich-brown));
-  }
-  
-  .bg-cream-bg {
-    background-color: hsl(var(--cream-bg));
-  }
-  
-  .bg-deep-brown {
-    background-color: hsl(var(--deep-brown));
-  }
-  
-  .bg-butter-yellow {
-    background-color: hsl(var(--butter-yellow));
-  }
-  
-  .border-warm-gold {
-    border-color: hsl(var(--warm-gold));
-  }
-  
-  .border-rich-brown {
-    border-color: hsl(var(--rich-brown));
-  }
-  
-  .hover\:bg-warm-gold:hover {
-    background-color: hsl(var(--warm-gold));
-  }
-  
-  .hover\:bg-rich-brown:hover {
-    background-color: hsl(var(--rich-brown));
-  }
-  
-  .hover\:text-warm-gold:hover {
-    color: hsl(var(--warm-gold));
+  .hover\:text-pouch-gold:hover {
+    color: hsl(var(--pouch-gold));
   }
 }
