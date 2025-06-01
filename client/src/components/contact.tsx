@@ -173,9 +173,9 @@ export function Contact() {
                   <div>
                     <h4 className="font-playfair font-bold mb-1 text-foreground">Address</h4>
                     <p className="text-muted-foreground">
-                      123 Heritage Street, Old City
+                      2-119, Mattampatti, konaganapuram
                       <br />
-                      Mumbai, Maharashtra 400001
+                      salem, Tamil Nadu-637102
                     </p>
                   </div>
                 </div>
@@ -186,9 +186,9 @@ export function Contact() {
                   <div>
                     <h4 className="font-playfair font-bold mb-1 text-foreground">Phone</h4>
                     <p className="text-muted-foreground">
-                      +91 98765 43210
+                      +91 9994287614
                       <br />
-                      +91 98765 43211
+                      +91 7904094521
                     </p>
                   </div>
                 </div>
