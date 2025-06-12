@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { MapPin, Phone, Mail, Clock, Send } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, Send, MessageCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import { apiRequest } from '@/lib/queryClient';
 import type { InsertContact } from '@shared/schema';
 import { useZodForm } from '@/hooks/use-zod-form';
 import { insertContactSchema } from '@shared/schemas/contacts';
+import { motion } from 'framer-motion';
 
 export function Contact() {
   const { toast } = useToast();
