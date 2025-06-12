@@ -30,19 +30,19 @@ export function Footer() {
   ];
 
   return (
-    <footer className="bg-deep-brown text-gray-800 py-12">
+    <footer className="bg-deep-brown text-warm-cream py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="space-y-4">
-            <h3 className="text-2xl font-playfair font-bold text-stone-700">GSR</h3>
-            <p className="text-stone-600 leading-relaxed">
+          <div className="space-y-6">
+            <h3 className="text-3xl font-playfair font-bold text-luxury-gold">GSR</h3>
+            <p className="text-warm-cream/80 leading-relaxed">
               Bringing you the finest ghee with 50 years of heritage, tradition, and unwavering
               commitment to quality.
             </p>
             <div className="flex space-x-4">
               <button
                 onClick={() => window.open('https://facebook.com', '_blank')}
-                className="w-10 h-10 bg-stone-600 text-gray-100 rounded-full flex items-center justify-center hover:bg-stone-700 transition-colors"
+                className="w-12 h-12 bg-rich-earth text-warm-cream rounded-full flex items-center justify-center hover:bg-luxury-gold hover:text-deep-brown transition-all duration-300 hover:scale-105"
                 aria-label="Facebook"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -51,7 +51,7 @@ export function Footer() {
               </button>
               <button
                 onClick={() => window.open('https://instagram.com', '_blank')}
-                className="w-10 h-10 bg-stone-600 text-gray-100 rounded-full flex items-center justify-center hover:bg-stone-700 transition-colors"
+                className="w-12 h-12 bg-rich-earth text-warm-cream rounded-full flex items-center justify-center hover:bg-luxury-gold hover:text-deep-brown transition-all duration-300 hover:scale-105"
                 aria-label="Instagram"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -60,7 +60,7 @@ export function Footer() {
               </button>
               <button
                 onClick={() => window.open('https://twitter.com', '_blank')}
-                className="w-10 h-10 bg-stone-600 text-gray-100 rounded-full flex items-center justify-center hover:bg-stone-700 transition-colors"
+                className="w-12 h-12 bg-rich-earth text-warm-cream rounded-full flex items-center justify-center hover:bg-luxury-gold hover:text-deep-brown transition-all duration-300 hover:scale-105"
                 aria-label="Twitter"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -71,13 +71,13 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="text-lg font-playfair font-bold text-stone-700 mb-4">Products</h4>
-            <ul className="space-y-2 text-stone-600">
+            <h4 className="text-xl font-playfair font-bold text-luxury-gold mb-6">Products</h4>
+            <ul className="space-y-3 text-warm-cream/80">
               {productLinks.map((link, index) => (
                 <li key={index}>
                   <button
                     onClick={() => scrollToSection('products')}
-                    className="hover:text-stone-800 transition-colors text-left"
+                    className="hover:text-luxury-gold transition-colors text-left"
                   >
                     {link.label}
                   </button>
@@ -87,13 +87,13 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="text-lg font-playfair font-bold text-stone-700 mb-4">Company</h4>
-            <ul className="space-y-2 text-stone-600">
+            <h4 className="text-xl font-playfair font-bold text-luxury-gold mb-6">Company</h4>
+            <ul className="space-y-3 text-warm-cream/80">
               {companyLinks.map((link, index) => (
                 <li key={index}>
                   <button
                     onClick={() => scrollToSection(link.section)}
-                    className="hover:text-stone-800 transition-colors text-left"
+                    className="hover:text-luxury-gold transition-colors text-left"
                   >
                     {link.label}
                   </button>
@@ -103,11 +103,11 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="text-lg font-playfair font-bold text-stone-700 mb-4">Support</h4>
-            <ul className="space-y-2 text-stone-600">
+            <h4 className="text-xl font-playfair font-bold text-luxury-gold mb-6">Support</h4>
+            <ul className="space-y-3 text-warm-cream/80">
               {supportLinks.map((link, index) => (
                 <li key={index}>
-                  <a href={link.href} className="hover:text-stone-800 transition-colors">
+                  <a href={link.href} className="hover:text-luxury-gold transition-colors">
                     {link.label}
                   </a>
                 </li>
@@ -116,9 +116,9 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-stone-400/50 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-stone-600">&copy; 2024 GSR Ghee. All rights reserved.</p>
-          <p className="text-stone-600 mt-2 md:mt-0">Crafted with ❤️ for pure ghee lovers</p>
+        <div className="border-t border-rich-earth/30 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
+          <p className="text-warm-cream/60">&copy; 2024 GSR Ghee. All rights reserved.</p>
+          <p className="text-warm-cream/60 mt-2 md:mt-0">Crafted with ❤️ for pure ghee lovers</p>
         </div>
       </div>
     </footer>
