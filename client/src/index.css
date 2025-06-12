@@ -1,151 +1,216 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Lato:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Lato:wght@300;400;500;600&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  /* Pouch-inspired Theme - NOW THE DEFAULT */
-  --background: 45 33% 92%; /* Creamy Beige from pouch body e.g. #F2EBE5 */
-  --foreground: 30 25% 10%; /* Dark Brown/Off-Black from pouch text e.g. #2A221B */
-  --muted: 45 33% 88%; /* Lighter creamy beige */
-  --muted-foreground: 30 25% 30%; /* Muted dark brown */
-  --popover: 45 40% 95%; /* Slightly off-white for popovers, e.g. #F5F2EF */
-  --popover-foreground: 30 25% 10%;
-  --card: 45 40% 95%; /* Card background e.g. #F5F2EF */
-  --card-foreground: 30 25% 10%;
-  --border: 35 45% 75%; /* Gold/Bronze border e.g. #D4B790 */
-  --input: 35 45% 75%;
-  --primary: 35 50% 55%; /* Rich Gold/Bronze for primary actions e.g. #C8A365 */
-  --primary-foreground: 30 25% 8%; /* Very dark brown for text on primary e.g. #211B15 */
-  --secondary: 35 40% 70%; /* Lighter Gold/Bronze for secondary elements e.g. #C2A984 */
-  --secondary-foreground: 30 25% 10%;
-  --accent: 35 60% 50%; /* Brighter Gold for accents e.g. #D9A44D */
-  --accent-foreground: 30 25% 8%; 
-  --destructive: 0 70% 50%; /* A suitable red */
-  --destructive-foreground: 0 0% 100%; /* white for destructive button text */
-  --ring: 35 50% 55%; /* Ring color matching primary */
-  --radius: 0.5rem;
+  /* Premium Artisanal Color System - Inspired by luxury food brands */
   
-  /* Custom GSR colors from Pouch - can be used alongside or instead of semantic ones if needed */
-  --pouch-cream: 45 33% 92%;   /* #F2EBE5 */
-  --pouch-gold: 35 50% 55%;    /* #C8A365 */
-  --pouch-dark-text: 30 25% 10%;/* #2A221B */
-  --pouch-accent-gold: 35 60% 50%; /* #D9A44D */
-  --pouch-border: 35 45% 75%;   /* #D4B790 */
+  /* Primary Brand Colors - Sophisticated Earth Tones */
+  --primary-50: 44 33% 97%;    /* Softest cream #faf9f7 */
+  --primary-100: 44 30% 94%;   /* Very light cream #f5f3f0 */
+  --primary-200: 44 28% 88%;   /* Light cream #ebe7e1 */
+  --primary-300: 44 26% 82%;   /* Medium light cream #ddd6cd */
+  --primary-400: 44 24% 75%;   /* Medium cream #ccc2b5 */
+  --primary-500: 40 28% 65%;   /* Warm taupe #b8a898 */
+  --primary-600: 35 32% 55%;   /* Muted gold #a5947e */
+  --primary-700: 30 36% 45%;   /* Rich earth #897963 */
+  --primary-800: 25 40% 35%;   /* Deep earth #6b5d47 */
+  --primary-900: 20 44% 25%;   /* Darkest brown #4a402e */
 
-  /* Old Modern Blue Theme - Commented out or can be removed */
-  /*
-  --background: 210 40% 98%; 
-  --foreground: 222 84% 15%; 
-  --muted: 210 40% 96%; 
-  --muted-foreground: 215 16% 47%; 
-  --popover: 0 0% 100%; 
-  --popover-foreground: 222 84% 15%; 
-  --card: 0 0% 100%; 
-  --card-foreground: 222 84% 15%; 
-  --border: 214 32% 91%; 
-  --input: 214 32% 91%; 
-  --primary: 221 83% 53%; 
-  --primary-foreground: 0 0% 100%; 
-  --secondary: 210 40% 96%; 
-  --secondary-foreground: 222 84% 15%; 
-  --accent: 217 91% 60%; 
-  --accent-foreground: 222 84% 15%; 
-  --destructive: 0 84% 60%; 
-  --destructive-foreground: 0 0% 98%; 
-  --ring: 221 83% 53%; 
-  */
+  /* Secondary - Sophisticated Accent Colors */
+  --secondary-50: 35 25% 96%;   /* Lightest gold #f7f5f3 */
+  --secondary-100: 35 22% 92%;  /* Very light gold #ede9e5 */
+  --secondary-200: 35 20% 85%;  /* Light gold #d9d1c7 */
+  --secondary-300: 35 18% 78%;  /* Medium light gold #c4b8a9 */
+  --secondary-400: 35 25% 68%;  /* Medium gold #b5a48e */
+  --secondary-500: 38 35% 58%;  /* Rich gold #a8956b */
+  --secondary-600: 40 40% 48%;  /* Deep gold #8f7c54 */
+  --secondary-700: 42 45% 38%;  /* Darker gold #766240 */
+  --secondary-800: 44 50% 28%;  /* Very dark gold #5d4c2f */
+  --secondary-900: 46 55% 18%;  /* Deepest gold #3f341f */
+
+  /* Accent - Deep Forest Green for Natural Feel */
+  --accent-50: 152 25% 96%;     /* Lightest sage #f4f7f5 */
+  --accent-100: 152 22% 92%;    /* Very light sage #e7ebe8 */
+  --accent-200: 152 20% 85%;    /* Light sage #d1d9d3 */
+  --accent-300: 152 18% 75%;    /* Medium sage #b8c4bb */
+  --accent-400: 152 20% 65%;    /* Medium moss #9eafa2 */
+  --accent-500: 154 25% 55%;    /* Rich moss #7d9482 */
+  --accent-600: 156 30% 45%;    /* Deep moss #637866 */
+  --accent-700: 158 35% 35%;    /* Darker moss #4a5d4d */
+  --accent-800: 160 40% 25%;    /* Very dark moss #334235 */
+  --accent-900: 162 45% 15%;    /* Deepest forest #1f281f */
+
+  /* Semantic Color Mappings */
+  --background: var(--primary-50);           /* Softest cream background */
+  --foreground: var(--primary-900);          /* Darkest brown text */
+  --muted: var(--primary-100);               /* Very light cream for muted areas */
+  --muted-foreground: var(--primary-700);    /* Rich earth for muted text */
+  --popover: var(--primary-50);              /* Softest cream for popovers */
+  --popover-foreground: var(--primary-900);  /* Darkest brown for popover text */
+  --card: var(--primary-50);                 /* Softest cream for cards */
+  --card-foreground: var(--primary-900);     /* Darkest brown for card text */
+  --border: var(--primary-200);              /* Light cream for borders */
+  --input: var(--primary-200);               /* Light cream for inputs */
+  
+  /* Primary Actions - Rich Gold */
+  --primary: var(--secondary-500);           /* Rich gold for primary buttons */
+  --primary-foreground: var(--primary-50);   /* Softest cream text on primary */
+  
+  /* Secondary Actions - Warm Taupe */
+  --secondary: var(--primary-500);           /* Warm taupe for secondary actions */
+  --secondary-foreground: var(--primary-900); /* Darkest brown text on secondary */
+  
+  /* Accent Actions - Deep Moss */
+  --accent: var(--accent-600);               /* Deep moss for accents */
+  --accent-foreground: var(--primary-50);    /* Softest cream text on accent */
+  
+  /* Status Colors */
+  --destructive: 0 70% 50%;                  /* Red for destructive actions */
+  --destructive-foreground: var(--primary-50); /* Softest cream text on destructive */
+  --ring: var(--secondary-500);              /* Rich gold for focus rings */
+  --radius: 0.75rem;                         /* Slightly more rounded for premium feel */
+
+  /* Custom Utility Colors - For direct usage */
+  --warm-cream: var(--primary-100);          /* Very light cream */
+  --rich-earth: var(--primary-700);          /* Rich earth tone */
+  --deep-brown: var(--primary-900);          /* Deepest brown */
+  --luxury-gold: var(--secondary-500);       /* Rich gold */
+  --deep-gold: var(--secondary-600);         /* Deep gold */
+  --forest-green: var(--accent-600);         /* Deep moss green */
+  --sage-green: var(--accent-400);           /* Medium sage */
+
+  /* Premium Typography Scale */
+  --font-size-xs: 0.75rem;      /* 12px */
+  --font-size-sm: 0.875rem;     /* 14px */
+  --font-size-base: 1rem;       /* 16px */
+  --font-size-lg: 1.125rem;     /* 18px */
+  --font-size-xl: 1.25rem;      /* 20px */
+  --font-size-2xl: 1.5rem;      /* 24px */
+  --font-size-3xl: 1.875rem;    /* 30px */
+  --font-size-4xl: 2.25rem;     /* 36px */
+  --font-size-5xl: 3rem;        /* 48px */
+  --font-size-6xl: 3.75rem;     /* 60px */
+
+  /* Premium Line Heights */
+  --line-height-tight: 1.25;
+  --line-height-snug: 1.375;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+  --line-height-loose: 2;
+
+  /* Premium Spacing Scale */
+  --spacing-xs: 0.25rem;         /* 4px */
+  --spacing-sm: 0.5rem;          /* 8px */
+  --spacing-md: 1rem;            /* 16px */
+  --spacing-lg: 1.5rem;          /* 24px */
+  --spacing-xl: 2rem;            /* 32px */
+  --spacing-2xl: 3rem;           /* 48px */
+  --spacing-3xl: 4rem;           /* 64px */
+  --spacing-4xl: 6rem;           /* 96px */
+  --spacing-5xl: 8rem;           /* 128px */
 }
 
-/* Alternative: Original Heritage Theme - This class definition can be removed if :root is now the heritage theme */
-/* 
-.heritage-theme {
-  --background: 45 33% 92%; 
-  --foreground: 30 25% 10%; 
-  --muted: 45 33% 88%; 
-  --muted-foreground: 30 25% 30%; 
-  --popover: 45 40% 95%; 
-  --popover-foreground: 30 25% 10%;
-  --card: 45 40% 95%; 
-  --card-foreground: 30 25% 10%;
-  --border: 35 45% 75%; 
-  --input: 35 45% 75%;
-  --primary: 35 50% 55%; 
-  --primary-foreground: 30 25% 8%; 
-  --secondary: 35 40% 70%; 
-  --secondary-foreground: 30 25% 10%;
-  --accent: 35 60% 50%; 
-  --accent-foreground: 30 25% 8%; 
-  --destructive: 0 70% 50%; 
-  --destructive-foreground: 0 0% 100%;
-  --ring: 35 50% 55%; 
-  
-  --pouch-cream: 45 33% 92%;
-  --pouch-gold: 35 50% 55%; 
-  --pouch-dark-text: 30 25% 10%;
-  --pouch-accent-gold: 35 60% 50%; 
-  --pouch-border: 35 45% 75%;
-}
-*/
-
-.dark { /* Dark theme can remain as an alternative if desired */
-  --background: 25 42% 12%; 
-  --foreground: 45 100% 97%; 
-  --muted: 25 30% 20%; 
-  --muted-foreground: 45 80% 80%; 
-  --popover: 25 42% 12%; 
-  --popover-foreground: 45 100% 97%; 
-  --card: 25 42% 12%; 
-  --card-foreground: 45 100% 97%; 
-  --border: 25 30% 25%; 
-  --input: 25 30% 25%; 
-  --primary: 39 30% 61%; 
-  --primary-foreground: 0 0% 100%; 
-  --secondary: 25 30% 20%; 
-  --secondary-foreground: 45 100% 97%; 
-  --accent: 39 100% 65%; 
-  --accent-foreground: 25 42% 12%; 
-  --destructive: 0 62% 30%; 
-  --destructive-foreground: 0 0% 98%; 
-  --ring: 39 30% 61%; 
+.dark {
+  /* Dark theme adjustments for premium look */
+  --background: var(--primary-900);
+  --foreground: var(--primary-50);
+  --muted: var(--primary-800);
+  --muted-foreground: var(--primary-300);
+  --popover: var(--primary-800);
+  --popover-foreground: var(--primary-50);
+  --card: var(--primary-800);
+  --card-foreground: var(--primary-50);
+  --border: var(--primary-700);
+  --input: var(--primary-700);
+  --primary: var(--secondary-400);
+  --primary-foreground: var(--primary-900);
+  --secondary: var(--primary-700);
+  --secondary-foreground: var(--primary-50);
+  --accent: var(--accent-500);
+  --accent-foreground: var(--primary-900);
+  --ring: var(--secondary-400);
 }
 
 @layer base {
   * {
-    @apply border-border transition-colors duration-200 ease-in-out;
+    @apply border-border transition-colors duration-300 ease-in-out;
   }
 
   body {
-    /* Ensure body picks up the new :root variables for background and foreground */
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Lato', sans-serif;
+    line-height: var(--line-height-relaxed);
+    letter-spacing: 0.025em; /* Subtle letter spacing for premium feel */
   }
   
+  /* Premium Typography Hierarchy */
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    line-height: var(--line-height-tight);
+    letter-spacing: -0.025em; /* Tighter letter spacing for headings */
   }
 
-  .font-lato {
-    font-family: 'Lato', sans-serif;
+  h1 {
+    font-size: var(--font-size-5xl);
+    font-weight: 700;
   }
 
+  h2 {
+    font-size: var(--font-size-4xl);
+    font-weight: 600;
+  }
+
+  h3 {
+    font-size: var(--font-size-3xl);
+    font-weight: 600;
+  }
+
+  h4 {
+    font-size: var(--font-size-2xl);
+    font-weight: 500;
+  }
+
+  h5 {
+    font-size: var(--font-size-xl);
+    font-weight: 500;
+  }
+
+  h6 {
+    font-size: var(--font-size-lg);
+    font-weight: 500;
+  }
+
+  p {
+    line-height: var(--line-height-relaxed);
+  }
+
+  /* Enhanced interactive elements */
   button, a {
-    @apply transition-all duration-200 ease-in-out;
+    @apply transition-all duration-300 ease-in-out;
   }
 
+  button:hover, a:hover {
+    transform: translateY(-1px);
+  }
+
+  /* Premium image handling */
   img {
-    @apply transition-transform duration-300 ease-in-out;
+    @apply transition-transform duration-500 ease-in-out;
   }
 
-  /* This rule can be removed as .heritage-theme class is no longer needed to activate the theme */
-  /* 
-  .heritage-theme body {
-    background-color: hsl(var(--background));
+  /* Enhanced focus styles */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: var(--radius);
   }
-  */
 }
 
 @layer utilities {
+  /* Typography Utilities */
   .font-playfair {
     font-family: 'Playfair Display', serif;
   }
@@ -153,38 +218,134 @@
   .font-lato {
     font-family: 'Lato', sans-serif;
   }
-  
-  /* New Pouch Theme Utilities - can be kept for specific overrides if needed,
-     but primary styling should rely on semantic vars like bg-primary, text-foreground etc. */
-  .text-pouch-gold {
-    color: hsl(var(--pouch-gold));
+
+  /* Premium Color Utilities */
+  .text-warm-cream {
+    color: hsl(var(--warm-cream));
   }
   
-  .text-pouch-dark-text {
-    color: hsl(var(--pouch-dark-text));
+  .text-rich-earth {
+    color: hsl(var(--rich-earth));
   }
   
-  .text-pouch-accent-gold {
-    color: hsl(var(--pouch-accent-gold));
+  .text-deep-brown {
+    color: hsl(var(--deep-brown));
   }
   
-  .bg-pouch-cream {
-    background-color: hsl(var(--pouch-cream));
+  .text-luxury-gold {
+    color: hsl(var(--luxury-gold));
   }
   
-  .bg-pouch-gold {
-    background-color: hsl(var(--pouch-gold));
+  .text-deep-gold {
+    color: hsl(var(--deep-gold));
   }
   
-  .border-pouch-border {
-    border-color: hsl(var(--pouch-border));
+  .text-forest-green {
+    color: hsl(var(--forest-green));
   }
   
-  .hover\:bg-pouch-accent-gold:hover {
-    background-color: hsl(var(--pouch-accent-gold));
+  .text-sage-green {
+    color: hsl(var(--sage-green));
+  }
+
+  .bg-warm-cream {
+    background-color: hsl(var(--warm-cream));
   }
   
-  .hover\:text-pouch-gold:hover {
-    color: hsl(var(--pouch-gold));
+  .bg-rich-earth {
+    background-color: hsl(var(--rich-earth));
+  }
+  
+  .bg-deep-brown {
+    background-color: hsl(var(--deep-brown));
+  }
+  
+  .bg-luxury-gold {
+    background-color: hsl(var(--luxury-gold));
+  }
+  
+  .bg-deep-gold {
+    background-color: hsl(var(--deep-gold));
+  }
+  
+  .bg-forest-green {
+    background-color: hsl(var(--forest-green));
+  }
+  
+  .bg-sage-green {
+    background-color: hsl(var(--sage-green));
+  }
+
+  /* Border utilities */
+  .border-warm-cream {
+    border-color: hsl(var(--warm-cream));
+  }
+  
+  .border-rich-earth {
+    border-color: hsl(var(--rich-earth));
+  }
+  
+  .border-luxury-gold {
+    border-color: hsl(var(--luxury-gold));
+  }
+
+  /* Hover utilities */
+  .hover\:bg-luxury-gold:hover {
+    background-color: hsl(var(--luxury-gold));
+  }
+  
+  .hover\:bg-deep-gold:hover {
+    background-color: hsl(var(--deep-gold));
+  }
+  
+  .hover\:text-luxury-gold:hover {
+    color: hsl(var(--luxury-gold));
+  }
+
+  /* Premium Shadow Utilities */
+  .shadow-premium {
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  .shadow-premium-lg {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Gradient utilities for premium feel */
+  .bg-gradient-premium {
+    background: linear-gradient(135deg, hsl(var(--primary-50)) 0%, hsl(var(--primary-100)) 100%);
+  }
+
+  .bg-gradient-gold {
+    background: linear-gradient(135deg, hsl(var(--secondary-400)) 0%, hsl(var(--secondary-600)) 100%);
+  }
+
+  /* Animation utilities */
+  .animate-fade-in {
+    animation: fadeIn 0.6s ease-in-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.8s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
