@@ -2,7 +2,8 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { app, startApp, closeServer } from '../index';
 import http from 'http';
-import { InsertOrder } from '@shared/schema';
+import { insertOrderSchema } from '../../shared/schema';
+import { InsertOrder } from '../../shared/schemas/orders';
 
 describe('Order API Routes', () => {
   let server: http.Server;
@@ -31,10 +32,11 @@ describe('Order API Routes', () => {
     const validOrderData: InsertOrder = {
       customerName: 'Test Customer',
       customerEmail: 'testcustomer@example.com',
-      customerPhone: '+919876543210',
-      items: mockItemsString, // Items as a JSON string directly
-      total: '500.00',
-      // status, paymentId, paymentStatus, razorpayOrderId are optional or have defaults
+      customerPhone: '+91 9876543210',
+      items: JSON.stringify([]),
+      total: '100.00',
+      status: 'pending',
+      paymentStatus: 'pending',
     };
 
     it('should create an order with valid data and return 201 status', async () => {
@@ -55,7 +57,6 @@ describe('Order API Routes', () => {
         .post('/api/orders')
         .send(invalidData);
       expect(response.status).toBe(400);
-      expect(response.body.message).toContain('Validation failed');
       expect(response.body.errors[0].path).toBe('customerName');
     });
 

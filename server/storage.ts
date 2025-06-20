@@ -22,6 +22,8 @@ export interface IStorage {
   // Orders
   createOrder(order: InsertOrder): Promise<Order>;
   getOrder(id: number): Promise<Order | undefined>;
+  getOrderByPaymentId(paymentId: string): Promise<Order | undefined>;
+  updateOrderStatus(orderId: number, status: string, paymentStatus: string, cfPaymentId?: string | null): Promise<Order | undefined>;
 
   // Contacts
   createContact(contact: InsertContact): Promise<Contact>;
@@ -143,6 +145,23 @@ export class MemStorage implements IStorage {
 
   async getOrder(id: number): Promise<Order | undefined> {
     return this.orders.get(id);
+  }
+
+  async getOrderByPaymentId(paymentId: string): Promise<Order | undefined> {
+    return Array.from(this.orders.values()).find(order => order.paymentId === paymentId);
+  }
+
+  async updateOrderStatus(orderId: number, status: string, paymentStatus: string, cfPaymentId?: string | null): Promise<Order | undefined> {
+    const order = this.orders.get(orderId);
+    if (order) {
+      order.status = status;
+      order.paymentStatus = paymentStatus;
+      if(cfPaymentId) {
+        order.razorpayOrderId = cfPaymentId; // Re-using this field for the CF payment ID
+      }
+      this.orders.set(orderId, order);
+    }
+    return order;
   }
 
   async createContact(insertContact: InsertContact): Promise<Contact> {

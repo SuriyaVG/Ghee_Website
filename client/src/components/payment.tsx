@@ -165,11 +165,11 @@ export function Payment({ items, total, customerInfo, onSuccess, onCancel }: Pay
         <CardContent>
           <div className="space-y-2">
             {items.map((item) => (
-              <div key={item.product.id} className="flex justify-between text-sm">
+              <div key={item.id} className="flex justify-between text-sm">
                 <span>
-                  {item.product.name} x {item.quantity}
+                  {item.name} x {item.quantity}
                 </span>
-                <span>₹{(parseFloat(item.product.price) * item.quantity).toFixed(2)}</span>
+                <span>₹{(item.price * item.quantity).toFixed(2)}</span>
               </div>
             ))}
             <div className="border-t pt-2 font-bold">

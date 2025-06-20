@@ -14,6 +14,7 @@ const app: ExpressAppType = expressFramework();
 const allowedOrigins = [
   'http://localhost:5000', // Vite dev server (often proxies to itself or backend port)
   'http://127.0.0.1:5000',
+  'http://localhost:5173', // Vite frontend dev server
   'https://gheewebsite-production.up.railway.app', // Your production frontend URL
   // Add your production frontend URL here when deploying
   // e.g., 'https://www.yourdomain.com'
@@ -21,13 +22,11 @@ const allowedOrigins = [
 
 const corsOptions: cors.CorsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
     }
-    return callback(null, true);
   },
   credentials: true, // Important for cookies, authorization headers with HTTPS
 };

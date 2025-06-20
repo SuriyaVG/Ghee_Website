@@ -33,28 +33,20 @@ export default function PaymentSuccessPage() {
   } = useMutation({
     mutationFn: async (payload: {
       cashfreeOrderId: string;
-      cfPaymentId: string | null; // Cashfree might also return its own payment_id in the redirect
       customerInfo: any;
       items: any[];
       total: number;
     }) => {
       const response = await apiRequest('POST', '/api/verify-cashfree-payment', payload);
-      if (!response.ok) {
-        const errorData = await response
-          .json()
-          .catch(() => ({ message: 'Verification request failed' }));
-        throw new Error(errorData.message || 'Payment verification and order creation failed.');
-      }
       return response.json();
     },
     onSuccess: (responseData) => {
       toast({
         title: 'Payment Verified & Order Placed!',
-        description: `Your order #${responseData.order?.id || responseData.orderId} has been successfully placed.`,
+        description: `Your order #${responseData.order?.id} has been successfully placed.`,
       });
       clearCart();
       queryClient.invalidateQueries({ queryKey: ['orders'] });
-      // Clean up sessionStorage
       const cfOrderId = getQueryParam('cf_order_id');
       if (cfOrderId) {
         sessionStorage.removeItem(`cf_pending_order_${cfOrderId}`);
@@ -68,7 +60,6 @@ export default function PaymentSuccessPage() {
           'There was an issue processing your order after payment. Please contact support.',
         variant: 'destructive',
       });
-      // Clean up sessionStorage even on error
       const cfOrderId = getQueryParam('cf_order_id');
       if (cfOrderId) {
         sessionStorage.removeItem(`cf_pending_order_${cfOrderId}`);
@@ -78,7 +69,6 @@ export default function PaymentSuccessPage() {
 
   useEffect(() => {
     const cashfreeOrderId = getQueryParam('cf_order_id');
-    const cfPaymentId = getQueryParam('cf_payment_id'); // Cashfree might add this to the return URL
 
     if (cashfreeOrderId) {
       const storedOrderDataString = sessionStorage.getItem(`cf_pending_order_${cashfreeOrderId}`);
@@ -87,7 +77,6 @@ export default function PaymentSuccessPage() {
           const temporaryOrderData: TemporaryOrderData = JSON.parse(storedOrderDataString);
           verifyPaymentAndCreateOrder({
             cashfreeOrderId,
-            cfPaymentId, // This might be null if not returned by Cashfree in query params
             customerInfo: temporaryOrderData.customerInfo,
             items: temporaryOrderData.items,
             total: temporaryOrderData.total,
@@ -95,29 +84,26 @@ export default function PaymentSuccessPage() {
         } catch (e) {
           toast({
             title: 'Error retrieving order details',
-            description:
-              'Could not retrieve your order details for verification. Please contact support.',
+            description: 'Could not retrieve your order details for verification. Please contact support.',
             variant: 'destructive',
           });
-          sessionStorage.removeItem(`cf_pending_order_${cashfreeOrderId}`); // Clean up
+          sessionStorage.removeItem(`cf_pending_order_${cashfreeOrderId}`);
         }
       } else {
         toast({
           title: 'Order Session Expired or Invalid',
-          description:
-            'Your payment session details could not be found. This may be due to an old link or if you have cleared your session data. Please contact support if payment was made.',
+          description: 'Your payment session details could not be found. Please contact support if payment was made.',
           variant: 'destructive',
         });
       }
     } else {
       toast({
         title: 'Invalid Payment URL',
-        description:
-          'Missing Cashfree Order ID in the URL. Please contact support if this issue persists.',
+        description: 'Missing order information in the return URL.',
         variant: 'destructive',
       });
     }
-  }, [verifyPaymentAndCreateOrder, toast]); // Removed navigate from deps as it's not used in useEffect directly
+  }, [verifyPaymentAndCreateOrder, toast]);
 
   if (isPending) {
     return (

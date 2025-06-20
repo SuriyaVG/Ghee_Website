@@ -109,9 +109,9 @@ export function Products() {
               selectedVariants[product.id] || product.variants[0]?.id;
             const currentVariant = product.variants.find((v) => v.id === currentSelectedVariantId);
             const displayImage =
-              currentVariant?.image_url ||
-              product.variants[0]?.image_url ||
-              '/placeholder-image.jpg';
+              (currentVariant?.image_url?.replace(/\.jpg$/, '.webp') ||
+              product.variants[0]?.image_url?.replace(/\.jpg$/, '.webp') ||
+              '/placeholder-image.webp');
             const displayPrice = currentVariant?.price || product.variants[0]?.price || '0.00';
 
             return (

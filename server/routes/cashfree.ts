@@ -106,50 +106,53 @@ router.post('/verify-cashfree-payment', async (req: Request, res: Response, next
   }
 });
 
-// Handle Cashfree webhooks
+// Handle Cashfree webhooks for asynchronous updates
 router.post('/cashfree-webhook', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const receivedSignature = req.body.signature;
-    const payload = { ...req.body };
-    delete payload.signature;
-    if (!receivedSignature) {
-      const err: any = new Error('Missing signature in webhook payload.');
+    const receivedSignature = req.headers['x-webhook-signature'] as string;
+    const timestamp = req.headers['x-webhook-timestamp'] as string;
+    const payload = JSON.stringify(req.body);
+
+    if (!receivedSignature || !timestamp || !process.env.CASHFREE_SECRET_KEY) {
+      const err: any = new Error('Missing webhook signature, timestamp, or server secret.');
       err.statusCode = 400;
       return next(err);
     }
+
     const crypto = await import('node:crypto');
-    const sortedKeys = Object.keys(payload).sort();
-    let toSign = '';
-    for (const key of sortedKeys) {
-      if (payload[key] != null) toSign += payload[key].toString();
-    }
-    const hmac = crypto.createHmac('sha256', process.env.CASHFREE_SECRET_KEY!);
-    hmac.update(toSign);
+    const signaturePayload = `${timestamp}${payload}`;
+    const hmac = crypto.createHmac('sha256', process.env.CASHFREE_SECRET_KEY);
+    hmac.update(signaturePayload);
     const computedSignature = hmac.digest('base64');
+
     if (computedSignature !== receivedSignature) {
       const err: any = new Error('Invalid webhook signature.');
       err.statusCode = 401;
       return next(err);
     }
-    const { order_id, cf_payment_id, order_status } = req.body;
-    if (order_id && order_status) {
-      const existing = await storage.getOrderByPaymentId(order_id);
-      if (existing) {
-        let newStatus = existing.status;
-        let newPaymentStatus = existing.paymentStatus;
-        if (order_status === 'PAID') {
-          newStatus = 'paid'; newPaymentStatus = 'completed';
-        } else if (['FAILED','USER_DROPPED'].includes(order_status)) {
-          newStatus = 'failed'; newPaymentStatus = 'failed';
-        } else if (order_status === 'PENDING') {
-          newPaymentStatus = 'pending_webhook';
-        }
-        if (newStatus !== existing.status || newPaymentStatus !== existing.paymentStatus) {
-          await storage.updateOrderStatus(existing.id, newStatus, newPaymentStatus, cf_payment_id);
-        }
-      }
+
+    const { data, type } = req.body;
+    let orderId, paymentStatus, cfPaymentId;
+
+    if(data && data.order && data.payment) {
+        orderId = data.order.order_id;
+        paymentStatus = data.payment.payment_status;
+        cfPaymentId = data.payment.cf_payment_id;
     }
-    res.status(200).json({ message: 'Webhook processed.' });
+
+    if (type === 'PAYMENT_SUCCESS_WEBHOOK' && paymentStatus === 'SUCCESS') {
+        const existingOrder = await storage.getOrderByPaymentId(orderId);
+        if (existingOrder && existingOrder.status !== 'paid') {
+          await storage.updateOrderStatus(existingOrder.id, 'paid', 'completed', cfPaymentId);
+        }
+    } else if (type === 'PAYMENT_FAILED_WEBHOOK') {
+        const existingOrder = await storage.getOrderByPaymentId(orderId);
+        if (existingOrder) {
+          await storage.updateOrderStatus(existingOrder.id, 'failed', 'failed', cfPaymentId);
+        }
+    }
+
+    res.status(200).json({ message: 'Webhook processed successfully.' });
   } catch (error) {
     next(error);
   }

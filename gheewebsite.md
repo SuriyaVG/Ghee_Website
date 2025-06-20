@@ -13,6 +13,8 @@
 - [Railway Roadmap](#railway-roadmap)
 - [Post-Deployment Changelog (2025-05-30)](#post-deployment-changelog-2025-05-30)
 - [API Testing with Vitest & Supertest](#api-testing-with-vitest--supertest)
+- [Post-Code Review 2024-06 Patches & Improvements](#post-code-review-2024-06-patches--improvements)
+- [2024-06: Image Optimization & Payment Flow Updates](#2024-06-image-optimization--payment-flow-updates)
 
 ## Project Overview
 GheeRoots is a professional e-commerce website for GSR, a family-owned ghee business. The site features a product showcase, company history, contact information, and a robust ordering system. The project is structured with `client`, `server`, and `shared` directories. The client uses React/TypeScript and Vite.
@@ -301,3 +303,76 @@ As of May 29, 2025, the GheeRoots website has been successfully deployed to Rail
 - **Railway Port Conflict (`EADDRINUSE`)**: Resolved an "address already in use" error on Railway. The Node.js backend was incorrectly using `process.env.PORT` (e.g., 8080), which conflicted with Caddy. Modified `server/index.ts` to ensure the backend consistently listens on an internal port `5000`, allowing Caddy to manage the public-facing port `$PORT` and proxy requests correctly. This stabilized the Railway deployment.
 
 - **Missing WhatsApp Icon (502 Error)**: Fixed a 502 Bad Gateway error for `/images/whatsapp-icon.svg`. The icon file was missing from `client/public/images/`. Added the `whatsapp-icon.svg` to the correct directory, ensuring it gets included in the build and served properly by Caddy.
+
+---
+
+## Post-Code Review 2024-06 Patches & Improvements
+
+### Major Features & Fixes
+
+1. **Cashfree Payment Flow Refactor**
+   - The cart and payment flow was refactored to store order data in sessionStorage until payment is confirmed.
+   - `/payment-success` page now verifies payment and creates the order only after successful payment.
+   - No premature order creation before payment.
+
+2. **Cashfree Webhook Integration**
+   - Added `/api/cashfree-webhook` endpoint with secure HMAC signature validation.
+   - Webhook updates order status (`paid`, `failed`) asynchronously based on Cashfree events.
+   - Storage interface extended with `getOrderByPaymentId` and `updateOrderStatus` methods.
+
+3. **Centralized Error Handling**
+   - Added robust error middleware in `server/index.ts` for all API errors.
+   - Handles Zod validation errors, Axios errors, and logs with Pino.
+
+4. **Validation Middleware**
+   - Introduced `validateRequest` middleware using Zod for all POST endpoints.
+   - Ensures all incoming data is validated and errors are handled consistently.
+
+5. **CORS & Security**
+   - Configured CORS to allow only whitelisted origins for API access.
+   - Environment variables loaded via `dotenv` for secure credential management.
+
+6. **Logging**
+   - Integrated `pino` and `pino-http` for structured request and error logging.
+
+7. **Test Coverage**
+   - Added/updated tests for order and contact validation (missing/invalid fields).
+   - Ensured all validation and error handling is covered by automated tests.
+
+8. **Frontend Cart & Payment Compatibility**
+   - Updated cart and payment components to use the new `CartItem` structure (no nested `product` object).
+   - Fixed all related linter/type errors.
+
+### Database Schema (as of this patch)
+- See the [Database Schema (Current)](#database-schema-current) section above for the latest schema, including new fields for payment tracking and webhook support.
+
+### How to Test
+- See the "What to Test" checklist in the chat for a full manual QA guide.
+- Run `npm test` or `npx vitest` to verify all backend API tests pass.
+
+## 2024-06: Image Optimization & Payment Flow Updates
+
+### Image Handling & Optimization
+- All product, hero, and heritage images are now served as `.webp` for modern browsers, with automatic fallback to `.jpg` (or `.png` for the logo).
+- The custom `<Image />` React component uses a `<picture>` element to provide both formats.
+- All image references in the codebase have been updated to use `.webp` as the primary source.
+- Logo uses a `<picture>` element for `/images/logo.webp` with fallback to `/images/logo.png`.
+- All images use `loading="lazy"` for performance.
+- **Recommended image size:** 50–200 KB per product image (WebP), max 300 KB for banners/hero.
+- Both `.webp` and `.jpg` versions must be present in `client/public/images/`.
+
+### Payment & Checkout Flow
+- Checkout and payment flow refactored: Cart → Checkout (customer info) → Payment (Cashfree or COD) → Success page (for Cashfree only).
+- For **Cashfree**: After payment, user is redirected to `/payment-success` and cart is cleared after confirmation.
+- For **Cash on Delivery (COD)**: Order is placed, cart is cleared, but user is **not yet redirected** to a success page (remains on cart with a toast). This is a known limitation and will be addressed in a future update.
+- Improved error handling and user feedback throughout checkout and payment.
+
+### Documentation & Code Comments
+- All major exported functions, interfaces, and types now have JSDoc-style comments or inline explanations.
+
+### Database Schema Update
+- `image_url` fields now point to `.webp` files, with `.jpg` fallback handled in the frontend.
+
+### Conflict Resolution
+- All references to image URLs in documentation and code now use `.webp` as the primary format.
+- Any old `.jpg`-only references have been updated or clarified to mention fallback behavior.

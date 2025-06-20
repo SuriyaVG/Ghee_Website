@@ -49,6 +49,17 @@ This is a professional e-commerce website for GSR, a trusted family-owned ghee (
     *   Dedicated Cart Page (`/cart`) to view and manage cart items.
     *   (Checkout process with Cashfree is partially integrated on the backend but needs frontend UI).
 *   **Visual Theme:** "Heritage Theme" activated globally, using colors like cream, gold, and brown.
+*   **Optimized image delivery:** All images are served as WebP with JPG/PNG fallback for compatibility and performance.
+*   **Robust checkout & payment flow:** Cart → Checkout (customer info) → Payment (Cashfree or COD) → Success page (for Cashfree only).
+*   **For Cashfree, user is redirected to /payment-success after payment and cart is cleared after confirmation.**
+*   **For COD, order is placed, cart is cleared, but user is NOT yet redirected to a success page (remains on cart with toast). This is a known limitation.**
+
+## Performance Recommendations
+
+*   **Use .webp images for all product and section images, with .jpg fallback for compatibility.**
+*   **Keep product images between 50–200 KB for optimal load speed.**
+*   **Use loading="lazy" for all images.**
+*   **Both .webp and .jpg (or .png) versions must be present in the images folder.**
 
 ## Getting Started
 

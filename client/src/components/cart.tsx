@@ -31,30 +31,6 @@ export function Cart({ isOpen, onClose }: CartProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const orderMutation = useMutation({
-    mutationFn: async (orderData: InsertOrder) => {
-      const response = await apiRequest('POST', '/api/orders', orderData);
-      return response.json();
-    },
-    onSuccess: (data) => {
-      toast({
-        title: 'Order placed successfully!',
-        description: `Your order #${data.id} has been placed. We'll contact you soon to confirm delivery details.`,
-      });
-      clearCart();
-      setShowCheckout(false);
-      setCustomerInfo({ customerName: '', customerEmail: '', customerPhone: '' });
-      onClose();
-    },
-    onError: () => {
-      toast({
-        title: 'Error placing order',
-        description: 'Please try again or contact us directly.',
-        variant: 'destructive',
-      });
-    },
-  });
-
   const handleQuantityChange = (productId: number, newQuantity: number) => {
     if (newQuantity < 1) return;
     updateQuantity(productId, newQuantity);
@@ -147,11 +123,11 @@ export function Cart({ isOpen, onClose }: CartProps) {
               <h3 className="font-playfair font-bold text-lg mb-4">Order Summary</h3>
               <div className="space-y-2">
                 {items.map((item) => (
-                  <div key={item.product.id} className="flex justify-between text-sm">
+                  <div key={item.productId} className="flex justify-between text-sm">
                     <span>
-                      {item.product.name} x {item.quantity}
+                      {item.name} x {item.quantity}
                     </span>
-                    <span>₹{(parseFloat(item.product.price) * item.quantity).toFixed(2)}</span>
+                    <span>₹{(item.price * item.quantity).toFixed(2)}</span>
                   </div>
                 ))}
                 <Separator />
@@ -210,10 +186,9 @@ export function Cart({ isOpen, onClose }: CartProps) {
                 </Button>
                 <Button
                   type="submit"
-                  disabled={orderMutation.isPending}
                   className="flex-1 bg-warm-gold hover:bg-rich-brown"
                 >
-                  {orderMutation.isPending ? 'Placing Order...' : 'Place Order'}
+                  Proceed to Payment
                 </Button>
               </div>
             </form>
@@ -244,24 +219,22 @@ export function Cart({ isOpen, onClose }: CartProps) {
             <>
               <div className="space-y-4 max-h-96 overflow-y-auto">
                 {items.map((item) => (
-                  <Card key={item.product.id}>
+                  <Card key={item.productId}>
                     <CardContent className="p-4">
                       <div className="flex items-start gap-4">
                         <img
-                          src={item.product.image}
-                          alt={item.product.name}
+                          src={item.variant.image_url.replace(/\.jpg$/, '.webp')}
+                          alt={item.name}
                           className="w-16 h-16 object-cover rounded-lg"
                         />
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-medium text-sm truncate">{item.product.name}</h3>
-                          <p className="text-warm-gold font-bold">₹{item.product.price}</p>
+                          <h3 className="font-medium text-sm truncate">{item.name}</h3>
+                          <p className="text-warm-gold font-bold">₹{item.price}</p>
                           <div className="flex items-center gap-2 mt-2">
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() =>
-                                handleQuantityChange(item.product.id, item.quantity - 1)
-                              }
+                              onClick={() => handleQuantityChange(item.productId, item.quantity - 1)}
                               className="w-8 h-8 p-0"
                             >
                               <Minus className="w-4 h-4" />
@@ -270,9 +243,7 @@ export function Cart({ isOpen, onClose }: CartProps) {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() =>
-                                handleQuantityChange(item.product.id, item.quantity + 1)
-                              }
+                              onClick={() => handleQuantityChange(item.productId, item.quantity + 1)}
                               className="w-8 h-8 p-0"
                             >
                               <Plus className="w-4 h-4" />
@@ -281,12 +252,12 @@ export function Cart({ isOpen, onClose }: CartProps) {
                         </div>
                         <div className="text-right">
                           <p className="font-bold text-sm">
-                            ₹{(parseFloat(item.product.price) * item.quantity).toFixed(2)}
+                            ₹{(item.price * item.quantity).toFixed(2)}
                           </p>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => removeItem(item.product.id)}
+                            onClick={() => removeItem(item.id)}
                             className="text-red-500 hover:text-red-700 p-1 h-auto"
                           >
                             <Trash2 className="w-4 h-4" />

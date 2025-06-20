@@ -39,7 +39,10 @@ export function Navbar() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <Link href="/" className="flex-shrink-0">
-                <img src="/images/logo.png" alt="GSR Logo" className="h-10 w-auto" />
+                <picture>
+                  <source srcSet="/images/logo.webp" type="image/webp" />
+                  <img src="/images/logo.png" alt="GSR Logo" className="h-10 w-auto" />
+                </picture>
               </Link>
             </div>
 

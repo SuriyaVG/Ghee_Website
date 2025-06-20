@@ -6,6 +6,8 @@ import { Link } from 'wouter';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
 import { Image } from '@/components/ui/image';
+import { useState } from 'react';
+import { Payment } from '@/components/payment';
 
 export default function CartPage() {
   const items = useCartStore((state) => state.items);
@@ -13,6 +15,15 @@ export default function CartPage() {
   const updateQuantity = useCartStore((state) => state.updateQuantity);
   const getTotalPrice = useCartStore((state) => state.getTotalPrice);
   const getTotalItems = useCartStore((state) => state.getTotalItems);
+  const clearCart = useCartStore((state) => state.clearCart);
+
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
+  const [customerInfo, setCustomerInfo] = useState({
+    customerName: '',
+    customerEmail: '',
+    customerPhone: '',
+  });
 
   const handleQuantityChange = (itemId: string, newQuantity: number) => {
     const quantity = parseInt(newQuantity.toString(), 10);
@@ -21,6 +32,38 @@ export default function CartPage() {
     } else if (quantity === 0) {
       removeItem(itemId);
     }
+  };
+
+  const handleCheckout = () => {
+    if (items.length === 0) return;
+    setShowCheckout(true);
+  };
+
+  const handlePlaceOrder = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customerInfo.customerName || !customerInfo.customerEmail || !customerInfo.customerPhone) {
+      // Add your toast or error handling here
+      return;
+    }
+    setShowPayment(true);
+  };
+
+  const handlePaymentSuccess = () => {
+    clearCart();
+    setShowCheckout(false);
+    setShowPayment(false);
+    setCustomerInfo({ customerName: '', customerEmail: '', customerPhone: '' });
+  };
+
+  const handlePaymentCancel = () => {
+    setShowPayment(false);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCustomerInfo((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
   };
 
   if (items.length === 0) {
@@ -46,6 +89,90 @@ export default function CartPage() {
     );
   }
 
+  if (showPayment) {
+    return (
+      <>
+        <Navbar />
+        <div className="max-w-2xl mx-auto py-12 px-4">
+          <h2 className="text-2xl font-bold mb-6">Payment</h2>
+          <Payment
+            items={items}
+            total={getTotalPrice()}
+            customerInfo={customerInfo}
+            onSuccess={handlePaymentSuccess}
+            onCancel={handlePaymentCancel}
+          />
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  if (showCheckout) {
+    return (
+      <>
+        <Navbar />
+        <div className="max-w-2xl mx-auto py-12 px-4">
+          <h2 className="text-2xl font-bold mb-6">Checkout</h2>
+          <form onSubmit={handlePlaceOrder} className="space-y-4">
+            <div>
+              <label htmlFor="customerName" className="block font-medium mb-1">Full Name *</label>
+              <Input
+                id="customerName"
+                name="customerName"
+                value={customerInfo.customerName}
+                onChange={handleInputChange}
+                placeholder="Your full name"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="customerEmail" className="block font-medium mb-1">Email *</label>
+              <Input
+                id="customerEmail"
+                name="customerEmail"
+                type="email"
+                value={customerInfo.customerEmail}
+                onChange={handleInputChange}
+                placeholder="your@email.com"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="customerPhone" className="block font-medium mb-1">Phone Number *</label>
+              <Input
+                id="customerPhone"
+                name="customerPhone"
+                type="tel"
+                value={customerInfo.customerPhone}
+                onChange={handleInputChange}
+                placeholder="+91 98765 43210"
+                required
+              />
+            </div>
+            <div className="flex gap-2 mt-6">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowCheckout(false)}
+                className="flex-1"
+              >
+                Back to Cart
+              </Button>
+              <Button
+                type="submit"
+                className="flex-1 bg-warm-gold hover:bg-rich-brown"
+              >
+                Proceed to Payment
+              </Button>
+            </div>
+          </form>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
   return (
     <>
       <Navbar />
@@ -63,7 +190,7 @@ export default function CartPage() {
                   className="flex flex-col sm:flex-row items-start sm:items-center py-6 border-b border-border last:border-b-0"
                 >
                   <Image
-                    src={item.variant.image_url}
+                    src={item.variant.image_url.replace(/\.jpg$/, '.webp')}
                     alt={item.name}
                     className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-lg shadow-md mb-4 sm:mb-0 sm:mr-6 flex-shrink-0"
                     loading="lazy"
@@ -131,7 +258,7 @@ export default function CartPage() {
               <p className="text-xs text-muted-foreground text-center mt-2 mb-6">
                 Taxes included, shipping calculated at next step.
               </p>
-              <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 py-3 text-lg">
+              <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 py-3 text-lg" onClick={handleCheckout}>
                 <ShoppingBag className="w-5 h-5 mr-2" /> Proceed to Checkout
               </Button>
               <Button

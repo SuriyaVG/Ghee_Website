@@ -66,7 +66,7 @@ export function Hero() {
           </div>
           <div className="relative">
             <Image
-              src="/images/hero-background.jpg"
+              src="/images/hero-background.webp"
               alt="Traditional ghee in golden jar"
               className="rounded-2xl shadow-2xl w-full h-96 object-cover"
               loading="lazy"
