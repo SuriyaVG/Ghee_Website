@@ -7,8 +7,35 @@ import logger from './logger'; // Import the configured pino logger
 import { registerRoutes } from './routes';
 import { setupVite, serveStatic } from './vite'; // Removed 'log' from here as pino will handle it
 import http from 'http'; // Import http
+import helmet from 'helmet';
 
 const app: ExpressAppType = expressFramework();
+
+// --- Development CSP Middleware ---
+// The following block is commented out for local development with Vite.
+// Vite's dev server requires no CSP for hot reloading and module loading to work correctly.
+// To test CSP locally, uncomment this block and adjust as needed.
+/*
+if (process.env.NODE_ENV === 'development') {
+  app.use((req, res, next) => {
+    res.setHeader(
+      'Content-Security-Policy',
+      "script-src 'self' 'unsafe-inline' https://sdk.cashfree.com"
+    );
+    next();
+  });
+}
+*/
+// --- End Development CSP Middleware ---
+
+// --- Security Middleware ---
+app.use(helmet());
+// Set X-Content-Type-Options header for all responses
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  next();
+});
+// --- End Security Middleware ---
 
 // --- CORS Configuration ---
 const allowedOrigins = [
@@ -19,6 +46,8 @@ const allowedOrigins = [
   // Add your production frontend URL here when deploying
   // e.g., 'https://www.yourdomain.com'
 ];
+
+console.log('ADMIN_API_TOKEN:', process.env.ADMIN_API_TOKEN);
 
 const corsOptions: cors.CorsOptions = {
   origin: (origin, callback) => {
@@ -123,6 +152,12 @@ app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
   res.status(statusCode).json(responseJson);
 });
 // --- End Centralized Error Handling ---
+
+// --- Static Assets Cache-Control (production only) ---
+if (process.env.NODE_ENV === 'production') {
+  app.use(expressFramework.static('dist', { maxAge: '1y' }));
+}
+// --- End Static Assets Cache-Control ---
 
 let runningServer: http.Server | null = null;
 

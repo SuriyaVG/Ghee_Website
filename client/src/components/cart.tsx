@@ -123,7 +123,7 @@ export function Cart({ isOpen, onClose }: CartProps) {
               <h3 className="font-playfair font-bold text-lg mb-4">Order Summary</h3>
               <div className="space-y-2">
                 {items.map((item) => (
-                  <div key={item.productId} className="flex justify-between text-sm">
+                  <div key={item.id} className="flex justify-between text-sm">
                     <span>
                       {item.name} x {item.quantity}
                     </span>
@@ -219,7 +219,7 @@ export function Cart({ isOpen, onClose }: CartProps) {
             <>
               <div className="space-y-4 max-h-96 overflow-y-auto">
                 {items.map((item) => (
-                  <Card key={item.productId}>
+                  <Card key={item.id}>
                     <CardContent className="p-4">
                       <div className="flex items-start gap-4">
                         <img
@@ -234,7 +234,7 @@ export function Cart({ isOpen, onClose }: CartProps) {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleQuantityChange(item.productId, item.quantity - 1)}
+                              onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
                               className="w-8 h-8 p-0"
                             >
                               <Minus className="w-4 h-4" />
@@ -243,7 +243,7 @@ export function Cart({ isOpen, onClose }: CartProps) {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleQuantityChange(item.productId, item.quantity + 1)}
+                              onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
                               className="w-8 h-8 p-0"
                             >
                               <Plus className="w-4 h-4" />

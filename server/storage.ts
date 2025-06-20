@@ -24,6 +24,7 @@ export interface IStorage {
   getOrder(id: number): Promise<Order | undefined>;
   getOrderByPaymentId(paymentId: string): Promise<Order | undefined>;
   updateOrderStatus(orderId: number, status: string, paymentStatus: string, cfPaymentId?: string | null): Promise<Order | undefined>;
+  getAllOrders(): Promise<Order[]>;
 
   // Contacts
   createContact(contact: InsertContact): Promise<Contact>;
@@ -162,6 +163,10 @@ export class MemStorage implements IStorage {
       this.orders.set(orderId, order);
     }
     return order;
+  }
+
+  async getAllOrders(): Promise<Order[]> {
+    return Array.from(this.orders.values());
   }
 
   async createContact(insertContact: InsertContact): Promise<Contact> {

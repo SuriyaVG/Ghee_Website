@@ -3,6 +3,7 @@
 ## Table of Contents
 - [Project Overview](#project-overview)
 - [Major Features Added](#major-features-added)
+- [Admin Panel & Secure Order Management](#admin-panel--secure-order-management)
 - [Database Schema (Current)](#database-schema-current)
 - [Migrations](#migrations)
 - [Issues Faced & Resolutions](#issues-faced--resolutions)
@@ -10,8 +11,7 @@
 - [Roadmap](#roadmap)
 - [Post-Code Review 1.0 Fixes](#post-code-review-10-fixes)
 - [Production Hosting on Railway](#production-hosting-on-railway)
-- [Railway Roadmap](#railway-roadmap)
-- [Post-Deployment Changelog (2025-05-30)](#post-deployment-changelog-2025-05-30)
+- [Security Best Practices](#security-best-practices)
 - [API Testing with Vitest & Supertest](#api-testing-with-vitest--supertest)
 - [Post-Code Review 2024-06 Patches & Improvements](#post-code-review-2024-06-patches--improvements)
 - [2024-06: Image Optimization & Payment Flow Updates](#2024-06-image-optimization--payment-flow-updates)
@@ -29,6 +29,59 @@ GheeRoots is a professional e-commerce website for GSR, a family-owned ghee busi
 - **Contact Section**: Allows users to send inquiries.
 - **Color Themes and Animations**: Enhanced visual appeal and user experience.
 - **Robust Image Handling**: All images now use a custom React `<Image />` component for graceful loading and fallback.
+- **Admin Panel Infinite Fetch Loop Fix**: Fixed a bug in the admin orders page where the orders fetch would run in an infinite loop due to unstable dependencies in the useEffect hook. The dependency array was corrected to only include [isLoggedIn, token, authLoading].
+
+---
+
+## Admin Panel & Secure Order Management
+
+### Admin Panel Features
+- **Login Page (`/admin`)**: Secure login with API token (ADMIN_API_TOKEN), stored in localStorage.
+- **Order List Page (`/admin/orders`)**: Fetches and displays all orders in a table. Shows order ID, customer info, payment method, total, created date, and item breakdown.
+- **Logout**: Clears the token and returns to login.
+- **Error Handling**: Handles 401 Unauthorized by auto-logging out, and displays clear error messages for failed requests.
+- **Minimal, clean UI**: Responsive and easy to use.
+- **File Structure**:
+  - `client/src/pages/admin/index.tsx` (login page)
+  - `client/src/pages/admin/orders.tsx` (orders list)
+  - `client/src/components/admin/OrderCard.tsx` (order display)
+  - `client/src/lib/useAdminAuth.ts` (auth hook)
+- **Infinite Fetch Loop Fix**: The admin orders page previously suffered from an infinite fetch loop due to unstable dependencies in the useEffect hook. This was resolved by updating the dependency array to only include stable values ([isLoggedIn, token, authLoading]).
+
+### Secure /api/orders Endpoint
+- **GET /api/orders**: Returns all orders, protected by an Authorization Bearer token (ADMIN_API_TOKEN).
+- **Admin authentication**: Token must be sent in the Authorization header. 401 Unauthorized if missing/invalid.
+- **Pagination**: Supports `?limit=50&offset=0` query params.
+- **Error Handling**: Returns JSON error messages for unauthorized or server errors.
+
+### Security Improvements
+- **Helmet**: HTTP security headers enabled via helmet middleware.
+- **CORS**: Only trusted origins allowed.
+- **.env**: All secrets and tokens are stored in .env, which is git-ignored.
+- **Admin API Token**: Never committed to git, always set via environment variable.
+- **Cart Clearing**: Cart is now cleared after both Cashfree and COD orders.
+
+## Security Best Practices
+- `.env` and all secret files are git-ignored and never committed.
+- Admin API endpoints are protected by a secure token (ADMIN_API_TOKEN).
+- Helmet is used for HTTP security headers.
+- CORS is restricted to trusted origins.
+- All user input is validated with Zod.
+- Sensitive endpoints require authentication.
+- HTTPS is recommended for production deployments.
+
+## Roadmap (Updated)
+- [x] Admin Panel for order management (login, view, logout, error handling)
+- [x] Secure /api/orders endpoint with token authentication
+- [x] Cart clearing after all successful orders
+- [x] Add helmet and improve CORS
+- [ ] CSV export and order status update in admin panel
+- [ ] Persistent database integration
+- [ ] User authentication for customers
+- [ ] Product management for admins
+
+## Environment Variables (Updated)
+- `ADMIN_API_TOKEN`: Token for admin panel and secure order management (must be set in .env, never committed)
 
 ---
 
@@ -105,6 +158,10 @@ GheeRoots is a professional e-commerce website for GSR, a family-owned ghee busi
 ### 4. **Frontend/Backend Not Syncing**
 - **Cause**: Sometimes the frontend or backend was not restarted after changes.
 - **Resolution**: Always restart both servers after major changes, especially when updating in-memory data or static assets.
+
+### 5. **Admin Orders Page Infinite Fetch Loop**
+- **Cause**: The useEffect hook in `client/src/pages/admin/orders.tsx` included function references (`logout`, `navigate`) in its dependency array, causing the effect to re-run on every render and resulting in an infinite fetch loop.
+- **Resolution**: The dependency array was updated to only include `[isLoggedIn, token, authLoading]`, which are stable values. This prevents unnecessary re-renders and fetches, resolving the infinite loop.
 
 ---
 
@@ -271,13 +328,6 @@ As of May 29, 2025, the GheeRoots website has been successfully deployed to Rail
 
 ---
 
-## Railway Roadmap
-- Update this section with production monitoring and performance metrics
-- Document any further Railway environment variables or scaling configurations
-- Plan for CI integration (GitHub Actions) and enable the 'Wait for CI' setting once workflows are in place
-
----
-
 ## Post-Deployment Changelog (2025-05-30)
 
 - **Caddy Proxy IPv6 Issue**: API requests were failing with `connection refused` because Caddy resolved `localhost` to IPv6 `::1`. We fixed this by updating the `Caddyfile` to proxy `/api` to `127.0.0.1:5000`.
@@ -342,6 +392,8 @@ As of May 29, 2025, the GheeRoots website has been successfully deployed to Rail
 8. **Frontend Cart & Payment Compatibility**
    - Updated cart and payment components to use the new `CartItem` structure (no nested `product` object).
    - Fixed all related linter/type errors.
+
+9. **Fixed: Infinite fetch loop in admin orders page by correcting useEffect dependencies.**
 
 ### Database Schema (as of this patch)
 - See the [Database Schema (Current)](#database-schema-current) section above for the latest schema, including new fields for payment tracking and webhook support.

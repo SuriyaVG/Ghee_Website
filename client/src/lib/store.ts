@@ -87,3 +87,14 @@ export const useCartStore = create<CartStore>()(
     }
   )
 );
+
+export function isValidCartItem(item: any): item is CartItem {
+  return (
+    typeof item === "object" &&
+    typeof item.id === "string" &&
+    typeof item.name === "string" &&
+    typeof item.price === "number" &&
+    typeof item.quantity === "number" &&
+    item.variant && typeof item.variant.image_url === "string"
+  );
+}
