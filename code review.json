@@ -1,0 +1,198 @@
+[
+  {
+    "id": "payments-flow-001-patch-1",
+    "file": "client/src/components/cart.tsx",
+    "action": "delete",
+    "at": "const orderMutation = useMutation({",
+    "content": null
+  },
+  {
+    "id": "payments-flow-001-patch-2",
+    "file": "client/src/components/cart.tsx",
+    "action": "replace",
+    "at": "const handlePlaceOrder = (e: React.FormEvent) => {",
+    "content": "  const handlePlaceOrder = (e: React.FormEvent) => {\n    e.preventDefault();\n\n    if (!customerInfo.customerName || !customerInfo.customerEmail || !customerInfo.customerPhone) {\n      toast({\n        title: 'Missing information',\n        description: 'Please fill in all required fields.',\n        variant: 'destructive',\n      });\n      return;\n    }\n\n    // Transition to the payment view without creating an order\n    setShowPayment(true);\n  };"
+  },
+  {
+    "id": "payments-flow-001-patch-3",
+    "file": "client/src/components/cart.tsx",
+    "action": "replace",
+    "at": "<Button\n                  type=\"submit\"\n                  disabled={orderMutation.isPending}",
+    "content": "                <Button\n                  type=\"submit\"\n                  className=\"flex-1 bg-warm-gold hover:bg-rich-brown\"\n                >\n                  Proceed to Payment\n                </Button>"
+  },
+  {
+    "id": "payments-flow-001-patch-4",
+    "file": "client/src/components/payment.tsx",
+    "action": "replace",
+    "at": "const handlePayment = async () => {",
+    "content": "  const handlePayment = async () => {\n    setIsProcessing(true);\n\n    try {\n      // Create Cashfree order to get an orderId and session\n      const cashfreeOrder = await createCashfreeOrderMutation.mutateAsync({\n        amount: total,\n        customerInfo,\n      });\n\n      if (cashfreeOrder && cashfreeOrder.orderId) {\n        // Temporarily store order data in sessionStorage, keyed by the Cashfree order ID\n        try {\n          const temporaryOrderData = {\n            customerInfo,\n            items,\n            total,\n          };\n          sessionStorage.setItem(\n            `cf_pending_order_${cashfreeOrder.orderId}`,\n            JSON.stringify(temporaryOrderData)\n          );\n        } catch (e) {\n          console.error('Failed to save temporary order data to sessionStorage', e);\n          setIsProcessing(false);\n          toast({\n            title: 'Error',\n            description: 'Could not prepare payment session. Please try again.',\n            variant: 'destructive',\n          });\n          return;\n        }\n\n        // Configure Cashfree checkout options\n        const cashfree = new (window as any).Cashfree({\n          mode: import.meta.env.VITE_CASHFREE_ENV || 'sandbox',\n        });\n\n        const checkoutOptions = {\n          paymentSessionId: cashfreeOrder.paymentSessionId,\n          // The returnUrl now includes the orderId for retrieval on the success page\n          returnUrl: `${window.location.origin}/payment-success?cf_order_id=${cashfreeOrder.orderId}`,\n        };\n\n        // Redirect to Cashfree's checkout\n        cashfree.checkout(checkoutOptions).then((result: any) => {\n          if (result.error) {\n            setIsProcessing(false);\n            toast({\n              title: 'Payment failed',\n              description: result.error.message || 'Payment could not be processed.',\n              variant: 'destructive',\n            });\n          }\n          // If successful, redirection is handled automatically by Cashfree.js\n        });\n      }\n    } catch (error) {\n      setIsProcessing(false);\n      toast({\n        title: 'Payment failed',\n        description: 'Unable to initialize payment. Please try again.',\n        variant: 'destructive',\n      });\n    }\n  };"
+  },
+  {
+    "id": "payments-flow-001-patch-5",
+    "file": "client/src/pages/payment-success.tsx",
+    "action": "replace",
+    "at": "export default function PaymentSuccessPage() {",
+    "content": "const getQueryParam = (param: string) => {\n  const urlParams = new URLSearchParams(window.location.search);\n  return urlParams.get(param);\n};\n\ninterface TemporaryOrderData {\n  customerInfo: any; \n  items: any[];\n  total: number;\n}\n\nexport default function PaymentSuccessPage() {\n  const [, navigate] = useLocation();\n  const { toast } = useToast();\n  const clearCart = useCartStore((state) => state.clearCart);\n\n  const {\n    mutate: verifyPaymentAndCreateOrder,\n    isPending,\n    isError,\n    isSuccess,\n    error,\n    data,\n  } = useMutation({\n    mutationFn: async (payload: {\n      cashfreeOrderId: string;\n      customerInfo: any;\n      items: any[];\n      total: number;\n    }) => {\n      const response = await apiRequest('POST', '/api/verify-cashfree-payment', payload);\n      return response.json();\n    },\n    onSuccess: (responseData) => {\n      toast({\n        title: 'Payment Verified & Order Placed!',\n        description: `Your order #${responseData.order?.id} has been successfully placed.`,\n      });\n      clearCart();\n      queryClient.invalidateQueries({ queryKey: ['orders'] });\n      const cfOrderId = getQueryParam('cf_order_id');\n      if (cfOrderId) {\n        sessionStorage.removeItem(`cf_pending_order_${cfOrderId}`);\n      }\n    },\n    onError: (err: Error) => {\n      toast({\n        title: 'Order Processing Failed',\n        description:\n          err.message ||\n          'There was an issue processing your order after payment. Please contact support.',\n        variant: 'destructive',\n      });\n      const cfOrderId = getQueryParam('cf_order_id');\n      if (cfOrderId) {\n        sessionStorage.removeItem(`cf_pending_order_${cfOrderId}`);\n      }\n    },\n  });\n\n  useEffect(() => {\n    const cashfreeOrderId = getQueryParam('cf_order_id');\n\n    if (cashfreeOrderId) {\n      const storedOrderDataString = sessionStorage.getItem(`cf_pending_order_${cashfreeOrderId}`);\n      if (storedOrderDataString) {\n        try {\n          const temporaryOrderData: TemporaryOrderData = JSON.parse(storedOrderDataString);\n          verifyPaymentAndCreateOrder({\n            cashfreeOrderId,\n            customerInfo: temporaryOrderData.customerInfo,\n            items: temporaryOrderData.items,\n            total: temporaryOrderData.total,\n          });\n        } catch (e) {\n          toast({\n            title: 'Error retrieving order details',\n            description: 'Could not retrieve your order details for verification. Please contact support.',\n            variant: 'destructive',\n          });\n          sessionStorage.removeItem(`cf_pending_order_${cashfreeOrderId}`);\n        }\n      } else {\n        toast({\n          title: 'Order Session Expired or Invalid',\n          description: 'Your payment session details could not be found. Please contact support if payment was made.',\n          variant: 'destructive',\n        });\n      }\n    } else {\n      toast({\n        title: 'Invalid Payment URL',\n        description: 'Missing order information in the return URL.',\n        variant: 'destructive',\n      });\n    }\n  }, [verifyPaymentAndCreateOrder, toast]);"
+  },
+  {
+    "id": "payments-webhook-001-patch-1",
+    "file": "server/routes/cashfree.ts",
+    "action": "insert",
+    "at": "export default router;",
+    "content": "\n// Handle Cashfree webhooks for asynchronous updates\nrouter.post('/cashfree-webhook', async (req: Request, res: Response, next: NextFunction) => {\n  try {\n    const receivedSignature = req.headers['x-webhook-signature'] as string;\n    const timestamp = req.headers['x-webhook-timestamp'] as string;\n    const payload = JSON.stringify(req.body);\n\n    if (!receivedSignature || !timestamp || !process.env.CASHFREE_SECRET_KEY) {\n      const err: any = new Error('Missing webhook signature, timestamp, or server secret.');\n      err.statusCode = 400;\n      return next(err);\n    }\n\n    const crypto = await import('node:crypto');\n    const signaturePayload = `${timestamp}${payload}`;\n    const hmac = crypto.createHmac('sha256', process.env.CASHFREE_SECRET_KEY);\n    hmac.update(signaturePayload);\n    const computedSignature = hmac.digest('base64');\n\n    if (computedSignature !== receivedSignature) {\n      const err: any = new Error('Invalid webhook signature.');\n      err.statusCode = 401;\n      return next(err);\n    }\n\n    const { data, type } = req.body;\n    let orderId, paymentStatus, cfPaymentId;\n\n    if(data && data.order && data.payment) {\n        orderId = data.order.order_id;\n        paymentStatus = data.payment.payment_status;\n        cfPaymentId = data.payment.cf_payment_id;\n    }\n\n    if (type === 'PAYMENT_SUCCESS_WEBHOOK' && paymentStatus === 'SUCCESS') {\n        const existingOrder = await storage.getOrderByPaymentId(orderId);\n        if (existingOrder && existingOrder.status !== 'paid') {\n          await storage.updateOrderStatus(existingOrder.id, 'paid', 'completed', cfPaymentId);\n        }\n    } else if (type === 'PAYMENT_FAILED_WEBHOOK') {\n        const existingOrder = await storage.getOrderByPaymentId(orderId);\n        if (existingOrder) {\n          await storage.updateOrderStatus(existingOrder.id, 'failed', 'failed', cfPaymentId);\n        }\n    }\n\n    res.status(200).json({ message: 'Webhook processed successfully.' });\n  } catch (error) {\n    next(error);\n  }\n});\n"
+  },
+  {
+    "id": "payments-webhook-001-patch-2",
+    "file": "server/storage.ts",
+    "action": "insert",
+    "at": "getOrder(id: number): Promise<Order | undefined>;",
+    "content": "  getOrderByPaymentId(paymentId: string): Promise<Order | undefined>;\n  updateOrderStatus(orderId: number, status: string, paymentStatus: string, cfPaymentId?: string | null): Promise<Order | undefined>;"
+  },
+  {
+    "id": "payments-webhook-001-patch-3",
+    "file": "server/storage.ts",
+    "action": "insert",
+    "at": "async createContact(insertContact: InsertContact): Promise<Contact> {",
+    "content": "  async getOrderByPaymentId(paymentId: string): Promise<Order | undefined> {\n    return Array.from(this.orders.values()).find(order => order.paymentId === paymentId);\n  }\n\n  async updateOrderStatus(orderId: number, status: string, paymentStatus: string, cfPaymentId?: string | null): Promise<Order | undefined> {\n    const order = this.orders.get(orderId);\n    if (order) {\n      order.status = status;\n      order.paymentStatus = paymentStatus;\n      if(cfPaymentId) {\n        order.razorpayOrderId = cfPaymentId; // Re-using this field for the CF payment ID\n      }\n      this.orders.set(orderId, order);\n    }\n    return order;\n  }\n\n"
+  },
+  {
+    "id": "backend-error-handling-001-patch-1",
+    "file": "server/index.ts",
+    "action": "insert",
+    "at": "app.use(expressFramework.urlencoded({ extended: false }));",
+    "content": "\n// --- Centralized Error Handling ---\napp.use((err: any, req: Request, res: Response, _next: NextFunction) => {\n  const errorLogger = req.log || logger;\n\n  errorLogger.error(\n    {\n      err,\n      req: { \n        id: req.id,\n        method: req.method,\n        url: req.originalUrl,\n      },\n    },\n    `Server Error: ${err.message}`\n  );\n\n  let statusCode = err.statusCode || 500;\n  let responseJson: { message: string; errors?: any; stack?: string; } = {\n    message: 'An unexpected error occurred.',\n  };\n\n  if (err instanceof ZodError) {\n    statusCode = 400; // Bad Request\n    responseJson.message = 'Validation failed. Please check your input.';\n    responseJson.errors = err.errors.map((e) => ({\n      path: e.path.join('.'),\n      message: e.message,\n    }));\n  } \n\n  if (process.env.NODE_ENV === 'production') {\n    if (statusCode >= 500) {\n      responseJson.message = 'Internal Server Error.';\n    }\n  } else {\n    responseJson.stack = err.stack;\n    if (responseJson.message === 'An unexpected error occurred.') {\n        responseJson.message = err.message;\n    }\n  }\n\n  res.status(statusCode).json(responseJson);\n});\n// --- End Centralized Error Handling ---"
+  },
+  {
+    "id": "backend-error-handling-001-patch-2",
+    "file": "server/routes/orders.ts",
+    "action": "replace",
+    "at": "router.post('/', validateRequest(insertOrderSchema), async (req: Request, res: Response, next: NextFunction) => {",
+    "content": "router.post('/', validateRequest(insertOrderSchema), async (req: Request, res: Response, next: NextFunction) => {\n  try {\n    const order = await storage.createOrder(req.body);\n    res.status(201).json(order);\n  } catch (error) {\n    next(error);\n  }\n});"
+  },
+  {
+    "id": "backend-error-handling-001-patch-3",
+    "file": "server/routes/contacts.ts",
+    "action": "replace",
+    "at": "router.post('/', validateRequest(insertContactSchema), async (req: Request, res: Response, next: NextFunction) => {",
+    "content": "router.post('/', validateRequest(insertContactSchema), async (req: Request, res: Response, next: NextFunction) => {\n  try {\n    const contact = await storage.createContact(req.body);\n    res.status(201).json(contact);\n  } catch (error) {\n    next(error);\n  }\n});"
+  },
+  {
+    "id": "security-env-vars-001-patch-1",
+    "file": "server/index.ts",
+    "action": "insert",
+    "at": "import expressFramework",
+    "content": "import 'dotenv/config';"
+  },
+  {
+    "id": "security-env-vars-001-patch-2",
+    "file": "server/routes/cashfree.ts",
+    "action": "replace",
+    "at": "const { amount, currency = 'INR', customerInfo } = req.body;",
+    "content": "    if (!process.env.CASHFREE_APP_ID || !process.env.CASHFREE_SECRET_KEY) {\n      const err = new Error('Cashfree credentials are not configured on the server.');\n      err.statusCode = 500;\n      return next(err);\n    }\n\n    const { amount, currency = 'INR', customerInfo } = req.body;"
+  },
+  {
+    "id": "architecture-validation-001-patch-1",
+    "file": "server/middleware/validateRequest.ts",
+    "action": "insert",
+    "at": "",
+    "content": "import { Request, Response, NextFunction } from 'express';\nimport { AnyZodObject } from 'zod';\n\nexport const validateRequest = (schema: AnyZodObject, property: 'body' | 'query' | 'params' = 'body') =>\n  async (req: Request, res: Response, next: NextFunction) => {\n    try {\n      req[property] = await schema.parseAsync(req[property]);\n      next();\n    } catch (error) {\n      next(error);\n    }\n  };"
+  },
+  {
+    "id": "architecture-validation-001-patch-2",
+    "file": "server/routes/orders.ts",
+    "action": "replace",
+    "at": "router.post('/', async (req: Request, res: Response, next: NextFunction) => {",
+    "content": "import { validateRequest } from '../middleware/validateRequest';\n\nconst router = Router();\n\n// Create a new order\nrouter.post('/', validateRequest(insertOrderSchema), async (req: Request, res: Response, next: NextFunction) => {"
+  },
+  {
+    "id": "architecture-validation-001-patch-3",
+    "file": "server/routes/contacts.ts",
+    "action": "replace",
+    "at": "router.post('/', async (req: Request, res: Response, next: NextFunction) => {",
+    "content": "import { validateRequest } from '../middleware/validateRequest';\n\nconst router = Router();\n\n// Create a new contact message\nrouter.post('/', validateRequest(insertContactSchema), async (req: Request, res: Response, next: NextFunction) => {"
+  },
+  {
+    "id": "backend-logging-001-patch-1",
+    "file": "server/logger.ts",
+    "action": "insert",
+    "at": "",
+    "content": "import pino from 'pino';\n\nconst logger = pino({\n  level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',\n  ...(process.env.NODE_ENV !== 'production' && {\n    transport: {\n      target: 'pino-pretty',\n      options: {\n        colorize: true,\n        levelFirst: true,\n        translateTime: 'SYS:standard',\n      },\n    },\n  }),\n});\n\nexport default logger;"
+  },
+  {
+    "id": "backend-logging-001-patch-2",
+    "file": "server/index.ts",
+    "action": "insert",
+    "at": "import { ZodError } from 'zod';",
+    "content": "import pinoHttp from 'pino-http';\nimport logger from './logger';"
+  },
+  {
+    "id": "backend-logging-001-patch-3",
+    "file": "server/index.ts",
+    "action": "insert",
+    "at": "const app: ExpressAppType = expressFramework();",
+    "content": "\n// Add pino-http middleware for request logging\napp.use(pinoHttp({ logger }));"
+  },
+  {
+    "id": "security-cors-001-patch-1",
+    "file": "server/index.ts",
+    "action": "insert",
+    "at": "import expressFramework",
+    "content": "import cors from 'cors';"
+  },
+  {
+    "id": "security-cors-001-patch-2",
+    "file": "server/index.ts",
+    "action": "insert",
+    "at": "app.use(pinoHttp({ logger }));",
+    "content": "\n// --- CORS Configuration ---\nconst allowedOrigins = [\n  'http://localhost:5000',\n  'http://127.0.0.1:5000',\n  // Add your production frontend URL here when deploying\n];\n\nconst corsOptions: cors.CorsOptions = {\n  origin: (origin, callback) => {\n    if (!origin || allowedOrigins.indexOf(origin) !== -1) {\n      callback(null, true);\n    } else {\n      callback(new Error('Not allowed by CORS'));\n    }\n  },\n  credentials: true,\n};\n\napp.use(cors(corsOptions));\n// --- End CORS Configuration ---"
+  },
+  {
+    "id": "testing-coverage-001-patch-1",
+    "file": "server/routes/contacts.test.ts",
+    "action": "insert",
+    "at": "expect(response.body.errors[0].path).toBe('firstName');",
+    "content": "    it('should return 400 if email is invalid', async () => {\n      const invalidData = { ...validContactData, email: 'not-an-email' };\n      const response = await request(app)\n        .post('/api/contacts')\n        .send(invalidData);\n      expect(response.status).toBe(400);\n      expect(response.body.errors[0].path).toBe('email');\n    });"
+  },
+  {
+    "id": "testing-coverage-001-patch-2",
+    "file": "server/routes/orders.test.ts",
+    "action": "insert",
+    "at": "expect(response.body.status).toBe('pending'); // Default status",
+    "content": "    it('should return 400 if customerName is missing', async () => {\n      const { customerName, ...invalidData } = validOrderData;\n      const response = await request(app)\n        .post('/api/orders')\n        .send(invalidData);\n      expect(response.status).toBe(400);\n      expect(response.body.errors[0].path).toBe('customerName');\n    });"
+  },
+  {
+    "id": "frontend-ux-001-patch-1",
+    "file": "client/src/components/navbar.tsx",
+    "action": "delete",
+    "at": "const [isCartOpen, setIsCartOpen] = useState(false);",
+    "content": null
+  },
+  {
+    "id": "frontend-ux-001-patch-2",
+    "file": "client/src/components/navbar.tsx",
+    "action": "replace",
+    "at": "onClick={() => setIsCartOpen(true)}",
+    "content": "asChild\n                className=\"bg-primary text-primary-foreground hover:bg-primary/90 transition-colors\"\n              >\n                <Link href=\"/cart\">"
+  },
+  {
+    "id": "frontend-ux-001-patch-3",
+    "file": "client/src/components/navbar.tsx",
+    "action": "insert",
+    "at": "Cart ({totalItems})",
+    "content": "</Link>"
+  },
+  {
+    "id": "frontend-ux-001-patch-4",
+    "file": "client/src/components/navbar.tsx",
+    "action": "delete",
+    "at": "<Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />",
+    "content": null
+  },
+  {
+    "id": "frontend-ux-001-patch-5",
+    "file": "client/src/components/navbar.tsx",
+    "action": "delete",
+    "at": "import { Cart } from \"./cart\";",
+    "content": null
+  }
+]

@@ -35,17 +35,17 @@ export function Heritage() {
 
   const familyValues = [
     {
-      image: '/images/ghee-250ml.jpg',
+      image: '/images/ghee-250ml.webp',
       title: 'Family Values',
       description: 'Every jar is made with the love and care of a family recipe',
     },
     {
-      image: '/images/ghee-500ml.jpg',
+      image: '/images/ghee-500ml.webp',
       title: 'Traditional Methods',
       description: 'Time-honored techniques ensure authentic taste and quality',
     },
     {
-      image: '/images/ghee-1000ml.jpg',
+      image: '/images/ghee-1000ml.webp',
       title: 'Quality Promise',
       description: '50 years of trust built on consistent quality and purity',
     },
@@ -95,7 +95,7 @@ export function Heritage() {
 
           <div className="relative">
             <Image
-              src="/images/hero-background.jpg"
+              src="/images/hero-background.webp"
               alt="Traditional heritage cooking setup"
               className="rounded-2xl shadow-2xl w-full h-96 object-cover"
               loading="lazy"

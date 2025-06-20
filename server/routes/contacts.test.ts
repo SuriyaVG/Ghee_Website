@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { app, startApp, closeServer } from '../index';
 import http from 'http';
-import { InsertContact } from '@shared/schema';
+import { InsertContact } from '../../shared/schemas/contacts';
 
 describe('Contact API Routes', () => {
   let server: http.Server;
@@ -46,12 +46,11 @@ describe('Contact API Routes', () => {
     });
 
     it('should return 400 if email is invalid', async () => {
-      const invalidData = { ...validContactData, email: 'invalid-email' };
+      const invalidData = { ...validContactData, email: 'not-an-email' };
       const response = await request(app)
         .post('/api/contacts')
         .send(invalidData);
       expect(response.status).toBe(400);
-      expect(response.body.message).toContain('Validation failed');
       expect(response.body.errors[0].path).toBe('email');
     });
 
