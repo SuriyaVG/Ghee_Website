@@ -6,10 +6,12 @@ For detailed architectural and feature documentation, refer to [gheewebsite.md](
 ## Table of Contents
 - [Project Overview](#project-overview)
 - [Core Features Implemented](#core-features-implemented)
+- [Admin Panel](#admin-panel)
 - [Getting Started](#getting-started)
 - [Available Scripts](#available-scripts)
 - [Project Structure](#project-structure)
 - [Key Technologies & Libraries](#key-technologies--libraries)
+- [Security Best Practices](#security-best-practices)
 - [Future Development & Considerations](#future-development--considerations)
 - [Environment Variables](#environment-variables)
 - [Contributing](#contributing)
@@ -31,6 +33,7 @@ This is a professional e-commerce website for GSR, a trusted family-owned ghee (
     *   Located in the `server` directory.
     *   Serves API endpoints for products, orders, and contacts.
     *   Integrates with Cashfree for payment processing (sandbox mode by default).
+    *   Uses helmet for security headers and CORS for cross-origin protection.
 *   **Shared Code:**
     *   Located in the `shared` directory.
     *   Contains database schema definitions using Drizzle ORM (`shared/schema.ts`) for PostgreSQL.
@@ -47,19 +50,24 @@ This is a professional e-commerce website for GSR, a trusted family-owned ghee (
 *   **Product Ordering System:**
     *   Shopping cart functionality.
     *   Dedicated Cart Page (`/cart`) to view and manage cart items.
-    *   (Checkout process with Cashfree is partially integrated on the backend but needs frontend UI).
+    *   Checkout process with Cashfree and Cash on Delivery (COD).
+    *   Cart is now cleared after both Cashfree and COD orders.
 *   **Visual Theme:** "Heritage Theme" activated globally, using colors like cream, gold, and brown.
 *   **Optimized image delivery:** All images are served as WebP with JPG/PNG fallback for compatibility and performance.
-*   **Robust checkout & payment flow:** Cart → Checkout (customer info) → Payment (Cashfree or COD) → Success page (for Cashfree only).
-*   **For Cashfree, user is redirected to /payment-success after payment and cart is cleared after confirmation.**
-*   **For COD, order is placed, cart is cleared, but user is NOT yet redirected to a success page (remains on cart with toast). This is a known limitation.**
+*   **Robust checkout & payment flow:** Cart → Checkout (customer info) → Payment (Cashfree or COD) → Success page.
+*   **Admin Panel:** Secure admin interface for order management (see below). Now robust against infinite fetch loops due to improved useEffect dependency management.
+*   **Secure /api/orders endpoint:** Protected by an admin token for order management.
 
-## Performance Recommendations
+## Admin Panel
 
-*   **Use .webp images for all product and section images, with .jpg fallback for compatibility.**
-*   **Keep product images between 50–200 KB for optimal load speed.**
-*   **Use loading="lazy" for all images.**
-*   **Both .webp and .jpg (or .png) versions must be present in the images folder.**
+A secure admin panel is available for order management:
+- **Login:** Accessible at `/admin`, requires the API token (ADMIN_API_TOKEN).
+- **Token Storage:** Token is stored in localStorage and used for all admin API requests.
+- **Order List:** View all customer orders, including order ID, customer info, payment method, total, created date, and item breakdown.
+- **Logout:** Clears the token and returns to the login page.
+- **Error Handling:** Handles 401 Unauthorized by auto-logging out, and displays clear error messages for failed requests.
+- **Minimal, clean UI:** Responsive and easy to use.
+- **Infinite Fetch Loop Fix:** The admin orders page previously suffered from an infinite fetch loop due to unstable dependencies in the useEffect hook. This has been fixed by only including stable dependencies ([isLoggedIn, token, authLoading]) in the effect, ensuring reliable data fetching.
 
 ## Getting Started
 
@@ -104,16 +112,18 @@ This is a professional e-commerce website for GSR, a trusted family-owned ghee (
 │   ├── src/                # Frontend source code
 │   │   ├── components/     # Reusable UI components (Navbar, Products, Heritage, etc.)
 │   │   │   ├── ui/         # shadcn/ui components
+│   │   │   └── admin/      # Admin panel components (OrderCard, etc.)
 │   │   ├── hooks/          # Custom React hooks (e.g., use-toast)
-│   │   ├── lib/            # Utility functions, queryClient, zustand store
-│   │   ├── pages/          # Page components (Home, Cart, NotFound)
+│   │   ├── lib/            # Utility functions, queryClient, zustand store, useAdminAuth
+│   │   ├── pages/          # Page components (Home, Cart, NotFound, Admin, etc.)
+│   │   │   └── admin/      # Admin login and orders pages
 │   │   ├── App.tsx         # Main app component with routing
 │   │   ├── main.tsx        # React entry point
 │   │   └── index.css       # Global styles and Tailwind directives
 │   ├── index.html          # Main HTML file
 │   └── vite.config.ts      # Vite configuration
 ├── server/                 # Backend (Node.js, Express)
-│   ├── index.ts            # Server entry point
+│   ├── index.ts            # Server entry point (helmet, CORS, error handling)
 │   ├── routes.ts           # API route definitions
 │   ├── storage.ts          # In-memory storage (for development)
 │   └── vite.ts             # Vite middleware setup for Express
@@ -148,12 +158,24 @@ This is a professional e-commerce website for GSR, a trusted family-owned ghee (
     *   Express.js
     *   TypeScript
     *   `tsx` (TypeScript execution)
+    *   `helmet` (security headers)
+    *   `cors` (CORS middleware)
 *   **Database & Schema:**
     *   Drizzle ORM (for PostgreSQL)
     *   Zod (validation)
 *   **Payments:**
     *   Cashfree (Node.js SDK for backend, JS SDK for frontend) - currently setup for sandbox.
         *   Environment variables needed for Cashfree: `CASHFREE_APP_ID`, `CASHFREE_SECRET_KEY`, `CASHFREE_ENV` (production/sandbox)
+
+## Security Best Practices
+
+*   `.env` and all secret files are git-ignored and never committed.
+*   Admin API endpoints are protected by a secure token (ADMIN_API_TOKEN).
+*   Helmet is used for HTTP security headers.
+*   CORS is restricted to trusted origins.
+*   All user input is validated with Zod.
+*   Sensitive endpoints require authentication.
+*   HTTPS is recommended for production deployments.
 
 ## Future Development & Considerations
 
@@ -166,9 +188,9 @@ This is a professional e-commerce website for GSR, a trusted family-owned ghee (
     *   Develop the frontend UI for the checkout process (shipping address, order summary, payment method selection).
     *   Integrate the Cashfree payment flow on the client-side using `cashfree.sandbox.js` (or production version).
     *   Handle payment success/failure callbacks and update order status in the database.
-*   **Order Management System (Admin Panel):** A separate interface or protected routes for administrators to manage products, view and update orders, and manage customers.
-*   **Product Management:**
-    *   If using a persistent DB, admin interface to add/edit products and their variants.
+*   **Order Management System (Admin Panel):**
+    *   Add features like CSV export, order status updates, and advanced filtering to the admin panel.
+    *   Add product management and admin user management.
 *   **Image Hosting:** Currently using Unsplash/Pixabay URLs. For production, product images should be hosted reliably (e.g., cloud storage like AWS S3, Cloudinary, or self-hosted).
 *   **Search Functionality:** Implement product search.
 *   **Support Pages:** Create actual content for FAQ, Shipping Info, Return Policy, Privacy Policy.
@@ -190,6 +212,7 @@ The following environment variables are used or will be needed:
 *   `CASHFREE_APP_ID`: Your Cashfree App ID.
 *   `CASHFREE_SECRET_KEY`: Your Cashfree Secret Key.
 *   `CASHFREE_ENV`: Set to `sandbox` for testing or `production` for live payments.
+*   `ADMIN_API_TOKEN`: Token for admin panel and secure order management.
 *   (For Persistent DB) `DATABASE_URL`: Connection string for your PostgreSQL database.
 
 ## Contributing
@@ -201,4 +224,16 @@ npm run format
 ```
 
 ## License
-This project is licensed under the MIT License. See the LICENSE file for details. 
+This project is licensed under the MIT License. See the LICENSE file for details.
+
+## Production Checklist
+
+### Image Optimization
+- ✅ Serve WebP with JPG/PNG fallbacks
+- ✅ Apply `loading="lazy"` to below-the-fold images
+- ✅ Implement `srcset` for responsive images
+
+### Cart Data Consistency
+- ✅ Normalized cart item structure enforced
+- ✅ Type checks for numeric pricing
+- ❌ Removed legacy product.* references

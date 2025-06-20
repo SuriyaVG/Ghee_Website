@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import type { CartItem } from '@/lib/store';
+import { isValidCartItem } from '@/lib/store';
 
 interface PaymentProps {
   items: CartItem[];
@@ -20,8 +20,12 @@ interface PaymentProps {
 }
 
 export function Payment({ items, total, customerInfo, onSuccess, onCancel }: PaymentProps) {
+  const validItems = items.filter(isValidCartItem);
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
+  const [codError, setCodError] = useState<string | null>(null);
+  const [codOrderId, setCodOrderId] = useState<number | null>(null);
+  const [isRetrying, setIsRetrying] = useState(false);
 
   const createOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
@@ -125,30 +129,21 @@ export function Payment({ items, total, customerInfo, onSuccess, onCancel }: Pay
   };
 
   const handleCashOnDelivery = async () => {
+    setCodError(null);
+    setIsRetrying(false);
     try {
       const orderData = {
         ...customerInfo,
-        items: JSON.stringify(items),
+        items: JSON.stringify(validItems),
         total: total.toString(),
         status: 'pending',
         paymentStatus: 'cod',
       };
-
-      await createOrderMutation.mutateAsync(orderData);
-
-      toast({
-        title: 'Order placed successfully!',
-        description:
-          "Your order has been placed. We'll contact you soon to confirm delivery and payment.",
-      });
-
-      onSuccess();
-    } catch (error) {
-      toast({
-        title: 'Order failed',
-        description: 'Unable to place order. Please try again.',
-        variant: 'destructive',
-      });
+      const order = await createOrderMutation.mutateAsync(orderData);
+      setCodOrderId(order.id);
+      window.location.href = `/payment-success?orderId=${order.id}`;
+    } catch (error: any) {
+      setCodError(error?.message || 'Unable to place order. Please try again.');
     }
   };
 
@@ -235,6 +230,19 @@ export function Payment({ items, total, customerInfo, onSuccess, onCancel }: Pay
                 {createOrderMutation.isPending ? 'Placing...' : 'Place Order'}
               </Button>
             </div>
+            {codError && (
+              <div className="mt-4 text-destructive text-sm">
+                {codError}
+                <div className="flex gap-2 mt-2">
+                  <Button size="sm" onClick={() => { setIsRetrying(true); handleCashOnDelivery(); }} disabled={isRetrying}>
+                    Retry
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={onCancel}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

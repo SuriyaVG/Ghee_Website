@@ -1,4 +1,4 @@
-import { useCartStore, type CartItem } from '@/lib/store';
+import { useCartStore, type CartItem, isValidCartItem } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Trash2, ShoppingBag, ArrowLeft } from 'lucide-react';
@@ -24,6 +24,11 @@ export default function CartPage() {
     customerEmail: '',
     customerPhone: '',
   });
+  const [errors, setErrors] = useState({
+    customerName: '',
+    customerEmail: '',
+    customerPhone: '',
+  });
 
   const handleQuantityChange = (itemId: string, newQuantity: number) => {
     const quantity = parseInt(newQuantity.toString(), 10);
@@ -39,12 +44,28 @@ export default function CartPage() {
     setShowCheckout(true);
   };
 
+  const validate = () => {
+    const newErrors = { customerName: '', customerEmail: '', customerPhone: '' };
+    if (!customerInfo.customerName.trim()) {
+      newErrors.customerName = 'Name is required.';
+    }
+    if (!customerInfo.customerEmail.trim()) {
+      newErrors.customerEmail = 'Email is required.';
+    } else if (!/^\S+@\S+\.\S+$/.test(customerInfo.customerEmail)) {
+      newErrors.customerEmail = 'Invalid email format.';
+    }
+    if (!customerInfo.customerPhone.trim()) {
+      newErrors.customerPhone = 'Phone number is required.';
+    } else if (!/^\d{10,}$/.test(customerInfo.customerPhone.replace(/\D/g, ''))) {
+      newErrors.customerPhone = 'Phone number must be at least 10 digits.';
+    }
+    setErrors(newErrors);
+    return !newErrors.customerName && !newErrors.customerEmail && !newErrors.customerPhone;
+  };
+
   const handlePlaceOrder = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!customerInfo.customerName || !customerInfo.customerEmail || !customerInfo.customerPhone) {
-      // Add your toast or error handling here
-      return;
-    }
+    if (!validate()) return;
     setShowPayment(true);
   };
 
@@ -64,6 +85,7 @@ export default function CartPage() {
       ...prev,
       [e.target.name]: e.target.value,
     }));
+    setErrors((prev) => ({ ...prev, [e.target.name]: '' }));
   };
 
   if (items.length === 0) {
@@ -125,6 +147,7 @@ export default function CartPage() {
                 placeholder="Your full name"
                 required
               />
+              {errors.customerName && <p className="text-destructive text-xs mt-1">{errors.customerName}</p>}
             </div>
             <div>
               <label htmlFor="customerEmail" className="block font-medium mb-1">Email *</label>
@@ -137,6 +160,7 @@ export default function CartPage() {
                 placeholder="your@email.com"
                 required
               />
+              {errors.customerEmail && <p className="text-destructive text-xs mt-1">{errors.customerEmail}</p>}
             </div>
             <div>
               <label htmlFor="customerPhone" className="block font-medium mb-1">Phone Number *</label>
@@ -149,6 +173,7 @@ export default function CartPage() {
                 placeholder="+91 98765 43210"
                 required
               />
+              {errors.customerPhone && <p className="text-destructive text-xs mt-1">{errors.customerPhone}</p>}
             </div>
             <div className="flex gap-2 mt-6">
               <Button
@@ -162,6 +187,7 @@ export default function CartPage() {
               <Button
                 type="submit"
                 className="flex-1 bg-warm-gold hover:bg-rich-brown"
+                disabled={!!errors.customerName || !!errors.customerEmail || !!errors.customerPhone}
               >
                 Proceed to Payment
               </Button>
@@ -184,7 +210,7 @@ export default function CartPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
             <div className="lg:col-span-2 bg-card shadow-xl rounded-2xl p-6 md:p-8">
-              {items.map((item: CartItem) => (
+              {items.filter(isValidCartItem).map((item: CartItem) => (
                 <div
                   key={item.id}
                   className="flex flex-col sm:flex-row items-start sm:items-center py-6 border-b border-border last:border-b-0"

@@ -10,6 +10,8 @@ const Home = lazy(() => import('@/pages/home'));
 const CartPage = lazy(() => import('@/pages/cart'));
 const PaymentSuccessPage = lazy(() => import('@/pages/payment-success'));
 const NotFound = lazy(() => import('@/pages/not-found'));
+const AdminLoginPage = lazy(() => import('@/pages/admin/index'));
+const AdminOrdersPage = lazy(() => import('@/pages/admin/orders'));
 
 function Router() {
   return (
@@ -17,6 +19,8 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/cart" component={CartPage} />
       <Route path="/payment-success" component={PaymentSuccessPage} />
+      <Route path="/admin" component={AdminLoginPage} />
+      <Route path="/admin/orders" component={AdminOrdersPage} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
