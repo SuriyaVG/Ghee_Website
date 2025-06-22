@@ -10,11 +10,13 @@ import productsRouter from './routes/products';
 import ordersRouter from './routes/orders';
 import contactsRouter from './routes/contacts';
 import cashfreeRouter from './routes/cashfree';
+import authRouter from './routes/auth';
 // Validation middleware
 import { validateRequest } from './middleware/validateRequest';
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Mount domain routers
+  app.use('/api/auth', authRouter);
   app.use('/api/products', productsRouter);
   app.use('/api/orders', ordersRouter);
   app.use('/api/contacts', contactsRouter);

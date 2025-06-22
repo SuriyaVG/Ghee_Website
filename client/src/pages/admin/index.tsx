@@ -1,47 +1,68 @@
-import { useState } from 'react';
-import { useLocation } from 'wouter';
-import { Button } from '@/components/ui/button';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-export default function AdminLoginPage() {
-  const [, navigate] = useLocation();
-  const [token, setToken] = useState('');
+const AdminLogin: React.FC = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  // If already logged in, redirect
-  if (typeof window !== 'undefined' && localStorage.getItem('admin_token')) {
-    navigate('/admin/orders');
-    return null;
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!token.trim()) {
-      setError('API Token is required');
-      return;
+    setError('');
+    setLoading(true);
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Login failed');
+      localStorage.setItem('admin_access_token', data.accessToken);
+      navigate('/admin/orders');
+    } catch (err: any) {
+      setError(err.message || 'Login failed');
+    } finally {
+      setLoading(false);
     }
-    localStorage.setItem('admin_token', token.trim());
-    navigate('/admin/orders');
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <form onSubmit={handleSubmit} className="bg-card p-8 rounded shadow-md w-full max-w-sm">
-        <h1 className="text-2xl font-bold mb-6 text-center">Admin Login</h1>
-        <div className="mb-4">
-          <label htmlFor="token" className="block font-medium mb-1">API Token</label>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f6f2e8' }}>
+      <form onSubmit={handleSubmit} style={{ background: '#fff', padding: 32, borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}>
+        <h2 style={{ textAlign: 'center', marginBottom: 24 }}>Admin Login</h2>
+        <div style={{ marginBottom: 16 }}>
+          <label htmlFor="email">Email</label>
           <input
-            id="token"
-            type="password"
-            className="w-full border rounded px-3 py-2"
-            value={token}
-            onChange={e => setToken(e.target.value)}
-            autoFocus
+            id="email"
+            type="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
             required
+            style={{ width: '100%', padding: 8, marginTop: 4, marginBottom: 12, borderRadius: 4, border: '1px solid #ccc' }}
           />
         </div>
-        {error && <div className="text-destructive text-sm mb-4">{error}</div>}
-        <Button type="submit" className="w-full">Login</Button>
+        <div style={{ marginBottom: 16 }}>
+          <label htmlFor="password">Password</label>
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            required
+            style={{ width: '100%', padding: 8, marginTop: 4, marginBottom: 12, borderRadius: 4, border: '1px solid #ccc' }}
+          />
+        </div>
+        {error && <div style={{ color: 'red', marginBottom: 12 }}>{error}</div>}
+        <button type="submit" disabled={loading} style={{ width: '100%', padding: 10, background: '#b88c4a', color: '#fff', border: 'none', borderRadius: 4, fontWeight: 600 }}>
+          {loading ? 'Logging in...' : 'Login'}
+        </button>
       </form>
     </div>
   );
-} 
+};
+
+export default AdminLogin; 

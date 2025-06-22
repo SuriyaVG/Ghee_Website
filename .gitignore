@@ -36,3 +36,11 @@ yarn-error.log*
 server/public
 vite.config.ts.*
 *.tar.gz
+
+# Migrations and seeds
+migrations/*.sql
+scripts/seed-admin-user.ts
+
+# Environment files
+.env*
+.env.example

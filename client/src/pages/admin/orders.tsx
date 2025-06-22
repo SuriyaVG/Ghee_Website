@@ -2,6 +2,9 @@ import { useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
 import { useAdminAuth } from '@/lib/useAdminAuth';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { saveAs } from 'file-saver';
+import { useMutation } from '@tanstack/react-query';
 
 interface Order {
   id: number;
@@ -10,9 +13,17 @@ interface Order {
   paymentMethod: string;
   totalAmount: string;
   createdAt: string;
-  items: { name: string; quantity: number }[];
+  items: { product_name: string; size?: string; quantity: number }[];
   status: string;
 }
+
+const statusOptions = [
+  'pending',
+  'confirmed',
+  'shipped',
+  'delivered',
+  'cancelled',
+];
 
 export default function AdminOrdersPage() {
   const { isLoggedIn, token, logout, loading: authLoading } = useAdminAuth();
@@ -20,6 +31,34 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [statusLoading, setStatusLoading] = useState<{ [orderId: number]: boolean }>({});
+  const { toast } = useToast();
+
+  const updateOrderStatusMutation = useMutation({
+    mutationFn: async ({ orderId, status }: { orderId: number; status: string }) => {
+      const response = await fetch(`/api/orders/${orderId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        const detail = errorData.errors?.[0]?.message ? `: ${errorData.errors[0].message}` : '';
+        throw new Error(`${errorData.message}${detail}`);
+      }
+      return response.json();
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Update Failed',
+        description: error.message || 'An unknown error occurred.',
+        variant: 'destructive',
+      });
+    },
+  });
 
   useEffect(() => {
     if (authLoading) return; // Wait for auth to load
@@ -57,6 +96,38 @@ export default function AdminOrdersPage() {
     navigate('/admin');
   };
 
+  const handleStatusChange = async (orderId: number, newStatus: string) => {
+    const originalOrders = [...orders];
+    // Optimistic update
+    setOrders(prevOrders =>
+      prevOrders.map(o => (o.id === orderId ? { ...o, status: newStatus } : o))
+    );
+
+    try {
+      await updateOrderStatusMutation.mutateAsync({ orderId, status: newStatus });
+      toast({
+        title: 'Success',
+        description: `Order #${orderId} status updated to ${newStatus}.`,
+      });
+    } catch (err: any) {
+      // Revert on error. The toast is handled by the mutation's onError.
+      setOrders(originalOrders);
+    }
+  };
+
+  const handleDownloadCSV = async () => {
+    try {
+      const res = await fetch('/api/orders/export/csv', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('Failed to download CSV');
+      const blob = await res.blob();
+      saveAs(blob, 'orders_export.csv');
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message || 'Failed to download CSV', variant: 'destructive' });
+    }
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -69,7 +140,10 @@ export default function AdminOrdersPage() {
     <div className="min-h-screen bg-background p-4">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Admin Orders</h1>
-        <Button variant="outline" onClick={handleLogout}>Logout</Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleDownloadCSV}>Download CSV</Button>
+          <Button variant="outline" onClick={handleLogout}>Logout</Button>
+        </div>
       </div>
       {loading ? (
         <div className="flex justify-center items-center h-40">
@@ -104,11 +178,25 @@ export default function AdminOrdersPage() {
                   <td className="p-2">
                     <ul className="list-disc pl-4">
                       {order.items.map((item, idx) => (
-                        <li key={idx}>{item.name} × {item.quantity}</li>
+                        <li key={idx}>
+                          {item.product_name} {item.size ? item.size : ''} × {item.quantity}
+                        </li>
                       ))}
                     </ul>
                   </td>
-                  <td className="p-2 capitalize">{order.status}</td>
+                  <td className="p-2 capitalize">
+                    <select
+                      className="border rounded px-2 py-1 bg-background"
+                      value={order.status}
+                      disabled={statusLoading[order.id]}
+                      onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                    >
+                      {statusOptions.map((status) => (
+                        <option key={status} value={status}>{status.charAt(0).toUpperCase() + status.slice(1)}</option>
+                      ))}
+                    </select>
+                    {statusLoading[order.id] && <span className="ml-2 animate-spin">🔄</span>}
+                  </td>
                 </tr>
               ))}
             </tbody>

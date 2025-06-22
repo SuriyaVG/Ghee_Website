@@ -29,12 +29,19 @@ describe('Order API Routes', () => {
       },
     ]);
 
-    const validOrderData: InsertOrder = {
+    const validOrderData: InsertOrder & { items: any[] } = {
       customerName: 'Test Customer',
       customerEmail: 'testcustomer@example.com',
       customerPhone: '+91 9876543210',
-      items: JSON.stringify([]),
-      total: '100.00',
+      items: [
+        {
+          productId: 1,
+          name: 'Pure Ghee - 250ml',
+          quantity: 2,
+          price: '170.00',
+        },
+      ],
+      total: '340.00',
       status: 'pending',
       paymentStatus: 'pending',
     };
@@ -48,7 +55,11 @@ describe('Order API Routes', () => {
       expect(response.body).toHaveProperty('id');
       expect(response.body.customerName).toBe(validOrderData.customerName);
       expect(response.body.total).toBe(validOrderData.total);
-      expect(response.body.status).toBe('pending'); // Default status
+      expect(response.body.status).toBe('pending');
+      expect(Array.isArray(response.body.items)).toBe(true);
+      expect(response.body.items.length).toBe(1);
+      expect(response.body.items[0].product_name).toBe('Pure Ghee - 250ml');
+      expect(response.body.items[0].quantity).toBe(2);
     });
 
     it('should return 400 if customerName is missing', async () => {
@@ -56,6 +67,7 @@ describe('Order API Routes', () => {
       const response = await request(app)
         .post('/api/orders')
         .send(invalidData);
+      console.log('Response body (customerName missing):', response.body);
       expect(response.status).toBe(400);
       expect(response.body.errors[0].path).toBe('customerName');
     });
@@ -65,6 +77,7 @@ describe('Order API Routes', () => {
       const response = await request(app)
         .post('/api/orders')
         .send(invalidData);
+      console.log('Response body (items missing):', response.body);
       expect(response.status).toBe(400);
        expect(response.body.message).toContain('Validation failed');
       expect(response.body.errors[0].path).toBe('items');
@@ -75,6 +88,7 @@ describe('Order API Routes', () => {
       const response = await request(app)
         .post('/api/orders')
         .send(invalidData);
+      console.log('Response body (total missing):', response.body);
       expect(response.status).toBe(400);
       expect(response.body.message).toContain('Validation failed');
       expect(response.body.errors[0].path).toBe('total');
@@ -85,10 +99,27 @@ describe('Order API Routes', () => {
       const response = await request(app)
         .post('/api/orders')
         .send(invalidData);
+      console.log('Response body (total not a number):', response.body);
       expect(response.status).toBe(400);
       expect(response.body.message).toContain('Validation failed');
       const totalError = response.body.errors.find((err: any) => err.path === 'total');
       expect(totalError).toBeDefined();
+    });
+
+    it('should return orders with items array for GET /api/orders', async () => {
+      // Create an order first
+      await request(app).post('/api/orders').send(validOrderData);
+      // Fetch orders as admin
+      const response = await request(app)
+        .get('/api/orders')
+        .set('Authorization', `Bearer ${process.env.ADMIN_API_TOKEN}`);
+      expect(response.status).toBe(200);
+      expect(Array.isArray(response.body)).toBe(true);
+      if (response.body.length > 0) {
+        expect(Array.isArray(response.body[0].items)).toBe(true);
+        expect(response.body[0].items[0]).toHaveProperty('product_name');
+        expect(response.body[0].items[0]).toHaveProperty('quantity');
+      }
     });
   });
 }); 

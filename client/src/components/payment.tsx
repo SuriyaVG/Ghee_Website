@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import { isValidCartItem } from '@/lib/store';
+import { isValidCartItem, type CartItem } from '@/lib/store';
 
 interface PaymentProps {
   items: CartItem[];
@@ -56,9 +56,15 @@ export function Payment({ items, total, customerInfo, onSuccess, onCancel }: Pay
 
       if (cashfreeOrder && cashfreeOrder.orderId) {
         try {
+          const itemsForOrder = validItems.map(item => ({
+            productId: item.variant.id,
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+          }));
           const temporaryOrderData = {
             customerInfo,
-            items,
+            items: itemsForOrder,
             total,
           };
           sessionStorage.setItem(
@@ -132,12 +138,18 @@ export function Payment({ items, total, customerInfo, onSuccess, onCancel }: Pay
     setCodError(null);
     setIsRetrying(false);
     try {
+      const itemsForOrder = validItems.map(item => ({
+        productId: item.variant.id,
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+      }));
       const orderData = {
         ...customerInfo,
-        items: JSON.stringify(validItems),
+        items: itemsForOrder,
         total: total.toString(),
         status: 'pending',
-        paymentStatus: 'cod',
+        paymentStatus: 'pending',
       };
       const order = await createOrderMutation.mutateAsync(orderData);
       setCodOrderId(order.id);
@@ -162,7 +174,7 @@ export function Payment({ items, total, customerInfo, onSuccess, onCancel }: Pay
             {items.map((item) => (
               <div key={item.id} className="flex justify-between text-sm">
                 <span>
-                  {item.name} x {item.quantity}
+                  {item.name} {item.variant.size} x {item.quantity}
                 </span>
                 <span>₹{(item.price * item.quantity).toFixed(2)}</span>
               </div>

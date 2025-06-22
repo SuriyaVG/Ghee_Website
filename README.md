@@ -1,4 +1,103 @@
-# GSR Heritage Ghee - E-commerce Website
+# GheeRoots E-Commerce Website
+
+GheeRoots is a professional, full-stack e-commerce website built for a family-owned ghee business. It features a complete shopping experience, from product browsing to a secure, multi-step checkout process. The backend is powered by Express and TypeScript, with a production-ready PostgreSQL database, while the frontend is a modern React application.
+
+## Key Features
+
+- **Full E-Commerce Flow**: Browse products, add items to the cart, and complete orders.
+- **Online & Offline Payments**: Supports both online payments via Cashfree and Cash on Delivery (COD).
+- **Robust Backend**: Built with Express.js, TypeScript, and Drizzle ORM for type-safe database queries.
+- **Production-Ready Database**: Uses PostgreSQL with a normalized schema, indexes, and data validation constraints.
+- **Secure Admin Panel**: JWT-based authentication for admin area to view and manage all customer orders.
+- **Modern Frontend**: A responsive and interactive UI built with React, Vite, and Tailwind CSS.
+- **Comprehensive Testing**: Includes unit and API tests to ensure backend reliability.
+
+## Tech Stack
+
+- **Backend**: Node.js, Express, TypeScript, pino (for logging)
+- **Database**: PostgreSQL, Drizzle ORM
+- **Frontend**: React, TypeScript, Vite, Tailwind CSS, shadcn/ui
+- **Testing**: Vitest, Supertest
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v18 or higher)
+- npm
+- A running PostgreSQL database instance
+
+### Installation & Setup
+
+1.  **Clone the repository:**
+    ```bash
+    git clone <repository-url>
+    cd Ghee_Website
+    ```
+
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+
+3.  **Set up environment variables:**
+    - Copy the `example.env` file to a new file named `.env`.
+    - Fill in the required values, especially `DATABASE_URL`, `ACCESS_TOKEN_SECRET`, `REFRESH_TOKEN_SECRET`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD`.
+
+4.  **Apply database schema:**
+    - The schema is defined in `/shared/schemas`. To apply it to your database, run:
+    ```bash
+    npm run db:push
+    ```
+
+5.  **Seed an admin user:**
+    - Run the admin seed script to create an admin user:
+    ```bash
+    npx tsx scripts/seed-admin-user.ts
+    ```
+
+### Running the Application
+
+This project requires two terminals to run both the frontend and backend servers concurrently.
+
+1.  **Start the backend server:**
+    ```bash
+    npm run dev:server
+    ```
+    The backend will be available at `http://localhost:5000`.
+
+2.  **Start the frontend development server:**
+    ```bash
+    npm run dev:client
+    ```
+    The frontend will be available at `http://localhost:5173` and will proxy API requests to the backend.
+
+## Admin Panel
+
+- **Access**: Navigate to `/admin`.
+- **Login**: Use your admin email and password (seeded or set in `.env`).
+- **Features**: View a paginated list of all customer orders, update order statuses, and export data.
+- **Authentication**: Uses JWT access and refresh tokens. All admin API requests require a Bearer access token.
+
+## Migration to JWT-Based Admin Authentication (2025-06)
+
+- Replaced static ADMIN_API_TOKEN authentication with JWT-based email/password login for admin panel.
+- Backend `/api/auth/login` issues access and refresh tokens; refresh token is set as HttpOnly cookie.
+- All admin routes now require a Bearer JWT access token in the Authorization header.
+- Frontend admin login page updated to use email/password and POST to `/api/auth/login`.
+- Admin orders page and all admin API calls now use the JWT access token.
+- Vite dev server proxy configured to forward `/api` and `/api/auth` requests to backend.
+- `useAdminAuth` hook updated to use `admin_access_token` for token storage.
+- `/auth` route mounted at `/api/auth` in backend for proxy compatibility.
+- Added migration SQL for `users` table and seed script for admin user.
+
+### Troubleshooting & Key Errors
+- **users table does not exist**: Fixed by running migration SQL via psql to create the table in Railway Postgres.
+- **psql not found**: Fixed by installing PostgreSQL and adding its `bin` directory to PATH.
+- **Vite proxy not working for /auth**: Fixed by using `/api/auth` for all auth endpoints and updating both frontend and backend accordingly.
+- **Unexpected end of JSON input**: Fixed by ensuring backend `/api/auth/login` always returns a JSON response, even for errors.
+- **404 on /auth/login**: Fixed by mounting `/api/auth` directly on the main Express app and updating all fetch calls to use `/api/auth/login`.
+- **Admin orders page stuck on loading**: Fixed by ensuring the JWT token key was consistent (`admin_access_token`) across login, storage, and API calls.
 
 ## Documentation
 For detailed architectural and feature documentation, refer to [gheewebsite.md](gheewebsite.md).
@@ -13,6 +112,7 @@ For detailed architectural and feature documentation, refer to [gheewebsite.md](
 - [Key Technologies & Libraries](#key-technologies--libraries)
 - [Security Best Practices](#security-best-practices)
 - [Future Development & Considerations](#future-development--considerations)
+- [Production Database (PostgreSQL)](#production-database-postgresql)
 - [Environment Variables](#environment-variables)
 - [Contributing](#contributing)
 - [License](#license)
@@ -102,6 +202,7 @@ A secure admin panel is available for order management:
 *   `npm run start`: Starts the production server (after running `npm run build`).
 *   `npm run check`: Runs TypeScript type checking.
 *   `npm run db:push`: (For Drizzle ORM with PostgreSQL) Pushes schema changes to the database. Requires database connection configured.
+*   `npm run db:constraints`: Applies production constraints, indexes, and views to the PostgreSQL database.
 
 ## Project Structure
 
@@ -180,9 +281,9 @@ A secure admin panel is available for order management:
 ## Future Development & Considerations
 
 *   **Persistent Database:**
-    *   Transition from `MemStorage` to a persistent PostgreSQL database using the Drizzle ORM schemas already defined.
-    *   Requires setting up a PostgreSQL instance and configuring connection details (likely in environment variables and `drizzle.config.ts`).
+    *   The backend now uses **PostgreSQL** as the default for production, with a normalized schema and Drizzle ORM migrations.
     *   Run `npm run db:push` after schema changes to update the database.
+    *   Run `npm run db:constraints` to apply production constraints, indexes, and views.
 *   **User Authentication:** Implement user accounts (e.g., using Passport.js or a similar library) for order history, saved addresses, etc.
 *   **Full Checkout Flow:**
     *   Develop the frontend UI for the checkout process (shipping address, order summary, payment method selection).
@@ -198,9 +299,31 @@ A secure admin panel is available for order management:
 *   **Deployment:**
     *   Choose a hosting platform (e.g., Vercel, Netlify for frontend; Render, Fly.io, AWS for backend and database).
     *   Configure environment variables for production (database credentials, Cashfree live keys, etc.).
-*   **Security:**
-    *   Ensure all security best practices are followed, especially for input validation, XSS prevention, CSRF protection, and secure handling of payment information and user data.
-    *   Regularly update dependencies.
+
+## Production Database (PostgreSQL)
+
+- The backend now uses a **production-grade PostgreSQL database** (hosted on Railway) with a fully normalized schema.
+- **Drizzle ORM** is used for schema management and migrations.
+- **Indexes** and **constraints** are in place for fast queries and strong data integrity.
+- **Foreign key relationships** and **ON DELETE CASCADE** are enforced for order and item consistency.
+- **Database-level validation** (CHECK constraints) ensures only valid data is stored.
+- **Views** are created for analytics (order summary, popular products).
+
+### Applying Schema & Constraints
+
+- To apply schema changes:  
+  ```bash
+  npx drizzle-kit push
+  ```
+- To apply production constraints, indexes, and views:  
+  ```bash
+  npm run db:constraints
+  ```
+
+### Backups
+
+- **Backups:** Enable daily/weekly PostgreSQL backups in the Railway dashboard for disaster recovery.
+- For extra safety, consider exporting regular SQL dumps externally.
 
 ## Environment Variables
 
@@ -237,3 +360,21 @@ This project is licensed under the MIT License. See the LICENSE file for details
 - ✅ Normalized cart item structure enforced
 - ✅ Type checks for numeric pricing
 - ❌ Removed legacy product.* references
+
+## 2024-06: End-to-End Order Placement & Admin Panel
+
+- Cash on Delivery (COD) and online order placement now work end-to-end.
+- Orders placed by customers appear in the Admin Panel for management and status updates.
+- Fixed a frontend bug where the `items` field was sent as a string instead of an array; the backend now receives the correct format.
+- Troubleshooting:
+  - If you see `EADDRINUSE`, kill the process using port 5000 before restarting the backend.
+  - Cashfree payment endpoints require `CASHFREE_APP_ID`, `CASHFREE_SECRET_KEY`, and `CASHFREE_ENV` in your `.env` file.
+
+## 2024-06: Order Status API & CSV Export
+
+- **PATCH /api/orders/:id/status**: Allows admins to update the status of any order (pending, processing, shipped, delivered, cancelled). Protected by admin authentication. Validates status using Zod. Returns the updated order on success.
+- **GET /api/orders/export/csv**: Exports all orders as a CSV file, including key order fields and item details. Supports optional query parameters:
+  - `status`: Filter orders by status (e.g., pending, shipped)
+  - `startDate`, `endDate`: Filter by order creation date range (ISO format)
+  - Protected by admin authentication.
+  - Download button is available in the Admin Panel to trigger CSV download.

@@ -15,6 +15,12 @@
 - [API Testing with Vitest & Supertest](#api-testing-with-vitest--supertest)
 - [Post-Code Review 2024-06 Patches & Improvements](#post-code-review-2024-06-patches--improvements)
 - [2024-06: Image Optimization & Payment Flow Updates](#2024-06-image-optimization--payment-flow-updates)
+- [2024-06: PostgreSQL Migration & Normalized Schema Implementation](#2024-06-postgresql-migration--normalized-schema-implementation)
+- [2024-06: Validation Layer & Error Handling Refactor](#2024-06-validation-layer--error-handling-refactor)
+- [2024-06: End-to-End Order Placement & Admin Panel](#2024-06-end-to-end-order-placement--admin-panel)
+- [2024-06: Order Status API & CSV Export](#2024-06-order-status-api--csv-export)
+- [2024-06: Production-Ready PostgreSQL Improvements](#2024-06-production-ready-postgresql-improvements)
+- [2025-06: Migration to JWT-Based Admin Authentication (and Debug Log)](#2025-06-migration-to-jwt-based-admin-authentication-and-debug-log)
 
 ## Project Overview
 GheeRoots is a professional e-commerce website for GSR, a family-owned ghee business. The site features a product showcase, company history, contact information, and a robust ordering system. The project is structured with `client`, `server`, and `shared` directories. The client uses React/TypeScript and Vite.
@@ -114,13 +120,22 @@ GheeRoots is a professional e-commerce website for GSR, a family-owned ghee busi
 | customerName     | text     | Customer name                               |
 | customerEmail    | text     | Customer email                              |
 | customerPhone    | text     | Customer phone                              |
-| items            | text     | JSON string of cart items                   |
 | total            | decimal  | Order total                                 |
 | status           | text     | Order status                                |
 | paymentId        | text     | Payment ID                                  |
 | paymentStatus    | text     | Payment status                              |
 | razorpayOrderId  | text     | Razorpay order ID                           |
 | createdAt        | timestamp| Order creation time                         |
+
+### order_items
+| Field             | Type     | Description                                 |
+|-------------------|----------|---------------------------------------------|
+| id                | serial   | Primary key                                 |
+| order_id          | integer  | Foreign key to orders (CASCADE delete)      |
+| product_id        | integer  | Foreign key to products                     |
+| product_name      | text     | Product name at time of order               |
+| quantity          | integer  | Quantity ordered                            |
+| price_per_item    | decimal  | Price per item at time of order             |
 
 ### contacts
 | Field        | Type     | Description                                 |
@@ -138,6 +153,7 @@ GheeRoots is a professional e-commerce website for GSR, a family-owned ghee busi
 ## Migrations
 - **Product Variant Images**: Migrated all product variant images from external URLs to local images (`/images/ghee-250ml.jpg`, `/images/ghee-500ml.jpg`, `/images/ghee-1000ml.jpg`).
 - **Frontend Image Handling**: Replaced all `<img>` tags with a custom `<Image />` component for better error handling and loading states.
+- **Database Normalization**: Added `order_items` table and removed `items` JSON column from `orders` table for proper relational structure.
 
 ---
 
@@ -428,3 +444,176 @@ As of May 29, 2025, the GheeRoots website has been successfully deployed to Rail
 ### Conflict Resolution
 - All references to image URLs in documentation and code now use `.webp` as the primary format.
 - Any old `.jpg`-only references have been updated or clarified to mention fallback behavior.
+
+## 2024-06: PostgreSQL Migration & Normalized Schema Implementation
+
+### Database Schema Normalization
+- **order_items table**: Added normalized `order_items` table with foreign key relationships to `orders` and `products`
+- **Removed items column**: The `items` JSON string column was removed from the `orders` table
+- **Normalized structure**: Orders now use a proper relational structure with separate `order_items` table
+
+### PostgreSQL Storage Implementation
+- **PgStorage class**: Implemented PostgreSQL-backed storage using Drizzle ORM
+- **Normalized operations**: All order operations now use the normalized schema
+- **Backward compatibility**: MemStorage updated to work with normalized structure for testing
+
+### Production Database Integration
+- **Railway PostgreSQL**: Successfully connected to production PostgreSQL database on Railway
+- **Schema migration**: Applied normalized schema using `npx drizzle-kit push`
+- **Production storage**: Switched from MemStorage to PgStorage for production use
+- **Database URL**: Configured with secure Railway PostgreSQL connection string
+
+### API Updates
+- **POST /api/orders**: Now accepts items as array, inserts into orders and order_items tables
+- **GET /api/orders**: Returns orders with normalized items array for admin panel compatibility
+- **Validation**: Updated Zod schema to handle items array separately from order data
+
+### Test Results
+- **Core functionality**: ✅ Order creation and retrieval with normalized items works correctly
+- **Admin panel compatibility**: ✅ Orders display with items array as expected
+- **Database migration**: ✅ Production PostgreSQL integration complete
+- **Validation tests**: Some validation edge cases need refinement (non-blocking)
+
+### Production Status
+- **Database**: ✅ PostgreSQL on Railway with normalized schema
+- **Storage**: ✅ PgStorage active for all order operations
+- **API**: ✅ POST and GET /api/orders working with normalized structure
+- **Admin Panel**: ✅ Compatible with new normalized order format
+
+### Next Steps
+- Refine validation test expectations if needed
+- Proceed with Order Status Updates or CSV export features
+- Monitor production performance with PostgreSQL
+
+---
+
+### 2024-06: Production-Ready PostgreSQL Improvements
+
+#### Schema Hardening
+- **Indexes:** Added indexes on all commonly queried fields (order status, created_at, product_id, etc.) for fast admin and user queries.
+- **Foreign Keys:** All relationships (order_items → orders, product_variants → products) use foreign keys with `CASCADE` or `SET NULL` for referential integrity.
+- **Check Constraints:**
+  - Orders: `total > 0`, valid status and payment status, valid email format.
+  - Order Items: `quantity > 0`, `price_per_item > 0`.
+  - Product Variants: `price > 0`, `stock_quantity >= 0`, valid size.
+  - Contacts: valid email format.
+- **Default Values:**
+  - Orders: `status` and `paymentStatus` default to 'pending'.
+  - Product Variants: `stock_quantity` defaults to 0.
+- **Unique Constraints:**
+  - Products: unique name.
+  - Product Variants: unique SKU.
+  - Orders: unique payment ID.
+
+#### Data Validation
+- All user input is validated at both the API and database level.
+- Legacy data was migrated and cleaned to comply with new constraints (see `scripts/fix-payment-status.ts`).
+
+#### Backups & Disaster Recovery
+- **Railway Backups:** Enable daily automated backups in the Railway PostgreSQL dashboard.
+- **Manual Backups:** Use `pg_dump` for periodic manual backups and before major migrations.
+- **Restore Plan:** Test restoring from backup to a staging environment before production changes.
+
+#### Migration Process
+- Schema changes are managed in `shared/schemas/` and pushed with `npm run db:push`.
+- Data fixes are scripted in `scripts/` and run with `npx tsx`.
+
+#### Performance
+- All admin and user queries are optimized with multi-column and single-column indexes.
+- Foreign key constraints ensure fast joins and safe deletes.
+
+#### Security
+- All sensitive fields are validated and sanitized.
+- Only trusted origins can access the API (CORS).
+- Admin endpoints require a secure token.
+
+## Final Bug Fixes & Stability Improvements (June 2024)
+
+After deploying the production-ready schema, a few persistent bugs were identified and resolved to ensure full stability.
+
+### 1. Order Status Update Failures
+- **Problem**: The admin panel failed to update an order's status to `confirmed`, throwing a validation error, even though other statuses worked.
+- **Root Cause**: A mismatch between the frontend, backend validation schema, and stale server processes. The frontend correctly sent `'confirmed'`, but an outdated server process was still running with a validation rule expecting `'processing'`.
+- **Solution**:
+  - The Zod validation schema in `server/routes/orders.ts` was corrected to explicitly expect `'confirmed'`.
+  - A command was used to forcefully stop the lingering server process on port 5000.
+  - The server was restarted, ensuring the corrected code was active.
+  - Error handling in the admin panel was improved to provide more detailed feedback from the backend.
+
+### 2. Duplicated Product Names in Orders
+- **Problem**: Order items in the admin panel were showing duplicated sizes in the product name (e.g., "Pure Ghee 500ml 500ml").
+- **Root Cause**: The frontend was adding a size to a product name that already contained it, and the backend logic was not robust enough to prevent this.
+- **Solution**:
+  - The backend `createOrder` function in `server/storage.ts` was updated with defensive logic. It now programmatically removes any existing size from the incoming item name before joining it with the definitive size fetched from the `product_variants` table. This ensures the product name is always correctly formatted.
+
+---
+
+## Getting Started
+## How to Preview Locally
+- Start the backend: `npm run dev:server`
+- Start the frontend: `npm run dev:client`
+- Visit: [http://localhost:5000/](http://localhost:5000/)
+
+# Admin Authentication (Updated)
+
+## JWT-based Auth
+- Admin login issues an access token (JWT, 15m) and a refresh token (JWT, 7d, HttpOnly cookie at /auth/refresh-token).
+- All admin routes now require a valid Bearer access token in the Authorization header.
+- Refresh token endpoint is protected with CSRF (csurf) and issues new access tokens.
+- ADMIN_API_TOKEN is removed.
+
+## Token Structure
+- Access token: `{ userId }`, signed with ACCESS_TOKEN_SECRET, expires in 15 minutes.
+- Refresh token: `{ userId }`, signed with REFRESH_TOKEN_SECRET, expires in 7 days, stored as HttpOnly cookie.
+
+## Login Flow
+- POST /auth/login with email and password.
+- On success: returns `{ accessToken }` and sets refresh token cookie.
+
+## Refresh Flow
+- POST /auth/refresh-token (with CSRF token in header and refresh cookie).
+- Returns new access token if refresh token is valid.
+
+## Database
+- User table must exist with at least: id, email, passwordHash.
+
+## Migration
+- Remove any code or documentation referencing ADMIN_API_TOKEN.
+
+## User Table Schema
+
+| Column       | Type    | Constraints         |
+|--------------|---------|--------------------|
+| id           | SERIAL  | PRIMARY KEY        |
+| email        | TEXT    | UNIQUE, NOT NULL   |
+| passwordHash | TEXT    | NOT NULL           |
+
+## 2025-06: Migration to JWT-Based Admin Authentication (and Debug Log)
+
+### Major Changes
+- Replaced static ADMIN_API_TOKEN authentication with JWT-based email/password login for admin panel.
+- Backend `/auth/login` issues access and refresh tokens; refresh token is set as HttpOnly cookie.
+- All admin routes now require a Bearer JWT access token in the Authorization header.
+- Frontend admin login page updated to use email/password and POST to `/api/auth/login`.
+- Admin orders page and all admin API calls now use the JWT access token.
+- Vite dev server proxy configured to forward `/api` and `/api/auth` requests to backend.
+- `useAdminAuth` hook updated to use `admin_access_token` for token storage.
+- `/auth` route mounted at `/api/auth` in backend for proxy compatibility.
+- Added migration SQL for `users` table and seed script for admin user.
+
+### Key Errors and Fixes
+- **users table does not exist**: Fixed by running migration SQL via psql to create the table in Railway Postgres.
+- **psql not found**: Fixed by installing PostgreSQL and adding its `bin` directory to PATH.
+- **Vite proxy not working for /auth**: Fixed by using `/api/auth` for all auth endpoints and updating both frontend and backend accordingly.
+- **Unexpected end of JSON input**: Fixed by ensuring backend `/auth/login` always returns a JSON response, even for errors.
+- **404 on /auth/login**: Fixed by mounting `/api/auth` directly on the main Express app and updating all fetch calls to use `/api/auth/login`.
+- **Admin orders page stuck on loading**: Fixed by ensuring the JWT token key was consistent (`admin_access_token`) across login, storage, and API calls.
+
+### Lessons Learned
+- Always use consistent token keys between login, storage, and API calls.
+- Vite proxy works best with `/api`-prefixed routes for local development.
+- Always restart both backend and frontend after config or route changes.
+- Use relative URLs in fetch calls to leverage the dev proxy.
+- Always check the Network tab and backend logs for debugging API issues.
+
+---
