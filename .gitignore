@@ -44,3 +44,12 @@ scripts/seed-admin-user.ts
 # Environment files
 .env*
 .env.example
+
+# Large binaries and installers
+postgresql-installer.exe
+*.exe
+*.msi
+*.zip
+*.tar.gz
+*.7z
+*.rar
