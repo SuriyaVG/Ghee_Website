@@ -1,20 +1,20 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'wouter';
+import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCartStore } from '@/lib/store';
 // import { Cart } from "./cart"; // Cart drawer might be replaced by CartPage
 
 export function Navbar() {
-  const [location, setLocation] = useLocation();
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   // const [isCartOpen, setIsCartOpen] = useState(false); // Cart drawer state might be removed
   const totalItems = useCartStore((state) => state.getTotalItems());
 
   const scrollToSection = (sectionId: string) => {
     setIsMenuOpen(false);
-    if (location !== '/') {
-      setLocation('/');
+    if (window.location.pathname !== '/') {
+      navigate('/');
       setTimeout(() => {
         const element = document.getElementById(sectionId);
         if (element) element.scrollIntoView({ behavior: 'smooth' });
@@ -38,7 +38,7 @@ export function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <Link href="/" className="flex-shrink-0">
+              <Link to="/" className="flex-shrink-0">
                 <picture>
                   <source srcSet="/images/logo.webp" type="image/webp" />
                   <img src="/images/logo.png" alt="GSR Logo" className="h-10 w-auto" />
@@ -61,7 +61,7 @@ export function Navbar() {
                   asChild
                   className="bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
                 >
-                  <Link href="/cart">
+                  <Link to="/cart">
                     <ShoppingCart className="w-4 h-4 mr-2" />
                     Cart ({totalItems})
                   </Link>
@@ -76,7 +76,7 @@ export function Navbar() {
                 size="sm"
                 className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
               >
-                <Link href="/cart">
+                <Link to="/cart">
                   <ShoppingCart className="w-4 h-4" />
                   <span className="ml-1">{totalItems}</span>
                 </Link>

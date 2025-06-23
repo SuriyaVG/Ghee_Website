@@ -2,7 +2,7 @@ import { useCartStore, type CartItem, isValidCartItem } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Trash2, ShoppingBag, ArrowLeft } from 'lucide-react';
-import { Link } from 'wouter';
+import { Link } from 'react-router-dom';
 import { Navbar } from '@/components/navbar';
 import { Footer } from '@/components/footer';
 import { Image } from '@/components/ui/image';
@@ -101,7 +101,7 @@ export default function CartPage() {
             Looks like you haven&apos;t added anything to your cart yet.
           </p>
           <Button asChild className="bg-primary text-primary-foreground hover:bg-primary/90">
-            <Link href="/">
+            <Link to="/">
               <ArrowLeft className="w-4 h-4 mr-2" /> Continue Shopping
             </Link>
           </Button>
@@ -292,7 +292,7 @@ export default function CartPage() {
                 variant="outline"
                 className="w-full mt-4 border-primary text-primary hover:bg-primary/10"
               >
-                <Link href="/">
+                <Link to="/">
                   <ArrowLeft className="w-4 h-4 mr-2" /> Continue Shopping
                 </Link>
               </Button>

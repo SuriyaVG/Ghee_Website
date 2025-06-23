@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Home } from 'lucide-react';
-import { Link } from 'wouter';
+import { Link } from 'react-router-dom';
 
 export default function NotFound() {
   return (
@@ -13,7 +13,7 @@ export default function NotFound() {
         Oops! The page you are looking for does not exist. It might have been moved or deleted.
       </p>
       <Button asChild className="bg-warm-gold text-white hover:bg-rich-brown px-8 py-3 text-lg">
-        <Link href="/">
+        <Link to="/">
           <Home className="w-5 h-5 mr-2" />
           Go to Homepage
         </Link>
