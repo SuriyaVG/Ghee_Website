@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
 const AdminLogin: React.FC = () => {
@@ -31,6 +31,13 @@ const AdminLogin: React.FC = () => {
   };
 
   const isLoggedIn = typeof window !== 'undefined' && !!localStorage.getItem('admin_access_token');
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate('/admin/orders', { replace: true });
+    }
+  }, [isLoggedIn, navigate]);
+
+  if (isLoggedIn) return null;
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f6f2e8' }}>

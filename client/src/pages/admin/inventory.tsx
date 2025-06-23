@@ -5,6 +5,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import type { ProductWithVariants, ProductVariant } from '@shared/schema';
+import { useNavigate, Link } from 'react-router-dom';
+
+function AdminNavBar() {
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    localStorage.removeItem('admin_access_token');
+    navigate('/admin', { replace: true });
+  };
+  return (
+    <nav className="flex items-center gap-4 p-4 bg-muted border-b mb-6">
+      <Link to="/admin/orders" className="font-bold text-primary hover:underline">Orders</Link>
+      <Link to="/admin/inventory" className="font-bold text-primary hover:underline">Inventory Management</Link>
+      <button onClick={handleLogout} className="ml-auto px-4 py-2 rounded bg-destructive text-white font-bold hover:bg-destructive/80 transition">Logout</button>
+    </nav>
+  );
+}
 
 export default function AdminInventoryPage() {
   useAdminAuth(); // Redirects if not admin
@@ -44,6 +60,7 @@ export default function AdminInventoryPage() {
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
+      <AdminNavBar />
       <h1 className="text-3xl font-bold mb-6">Inventory Management</h1>
       <table className="min-w-full border rounded bg-card">
         <thead>

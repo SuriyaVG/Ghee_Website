@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useLocation } from 'wouter';
+import { useLocation, Link } from 'wouter';
 import { useAdminAuth } from '@/lib/useAdminAuth';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { saveAs } from 'file-saver';
 import { useMutation } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 
 interface Order {
   id: number;
@@ -25,6 +26,21 @@ const statusOptions = [
   'cancelled',
 ];
 
+function AdminNavBar() {
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    localStorage.removeItem('admin_access_token');
+    navigate('/admin', { replace: true });
+  };
+  return (
+    <nav className="flex items-center gap-4 p-4 bg-muted border-b mb-6">
+      <Link to="/admin/orders" className="font-bold text-primary hover:underline">Orders</Link>
+      <Link to="/admin/inventory" className="font-bold text-primary hover:underline">Inventory Management</Link>
+      <button onClick={handleLogout} className="ml-auto px-4 py-2 rounded bg-destructive text-white font-bold hover:bg-destructive/80 transition">Logout</button>
+    </nav>
+  );
+}
+
 export default function AdminOrdersPage() {
   const { isLoggedIn, token, logout, loading: authLoading } = useAdminAuth();
   const [, navigate] = useLocation();
@@ -33,6 +49,7 @@ export default function AdminOrdersPage() {
   const [error, setError] = useState('');
   const [statusLoading, setStatusLoading] = useState<{ [orderId: number]: boolean }>({});
   const { toast } = useToast();
+  const navigateRouter = useNavigate();
 
   const updateOrderStatusMutation = useMutation({
     mutationFn: async ({ orderId, status }: { orderId: number; status: string }) => {
@@ -137,72 +154,75 @@ export default function AdminOrdersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Admin Orders</h1>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={handleDownloadCSV}>Download CSV</Button>
-          <Button variant="outline" onClick={handleLogout}>Logout</Button>
+    <div className="p-8 max-w-6xl mx-auto">
+      <AdminNavBar />
+      <div className="min-h-screen bg-background p-4">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Admin Orders</h1>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleDownloadCSV}>Download CSV</Button>
+            <Button variant="outline" onClick={handleLogout}>Logout</Button>
+          </div>
         </div>
-      </div>
-      {loading ? (
-        <div className="flex justify-center items-center h-40">
-          <span className="animate-spin mr-2">🔄</span> Loading orders...
-        </div>
-      ) : error ? (
-        <div className="text-destructive text-center mb-4">{error}</div>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="min-w-full border rounded bg-card">
-            <thead>
-              <tr className="bg-muted">
-                <th className="p-2 text-left">Order ID</th>
-                <th className="p-2 text-left">Customer Name</th>
-                <th className="p-2 text-left">Phone</th>
-                <th className="p-2 text-left">Payment</th>
-                <th className="p-2 text-left">Total (₹)</th>
-                <th className="p-2 text-left">Created At</th>
-                <th className="p-2 text-left">Items</th>
-                <th className="p-2 text-left">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((order) => (
-                <tr key={order.id} className="border-b last:border-b-0">
-                  <td className="p-2 font-mono">{order.id}</td>
-                  <td className="p-2">{order.customerName}</td>
-                  <td className="p-2">{order.phoneNumber}</td>
-                  <td className="p-2 uppercase">{order.paymentMethod}</td>
-                  <td className="p-2">{order.totalAmount}</td>
-                  <td className="p-2 text-xs">{new Date(order.createdAt).toLocaleString()}</td>
-                  <td className="p-2">
-                    <ul className="list-disc pl-4">
-                      {order.items.map((item, idx) => (
-                        <li key={idx}>
-                          {item.product_name} {item.size ? item.size : ''} × {item.quantity}
-                        </li>
-                      ))}
-                    </ul>
-                  </td>
-                  <td className="p-2 capitalize">
-                    <select
-                      className="border rounded px-2 py-1 bg-background"
-                      value={order.status}
-                      disabled={statusLoading[order.id]}
-                      onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                    >
-                      {statusOptions.map((status) => (
-                        <option key={status} value={status}>{status.charAt(0).toUpperCase() + status.slice(1)}</option>
-                      ))}
-                    </select>
-                    {statusLoading[order.id] && <span className="ml-2 animate-spin">🔄</span>}
-                  </td>
+        {loading ? (
+          <div className="flex justify-center items-center h-40">
+            <span className="animate-spin mr-2">🔄</span> Loading orders...
+          </div>
+        ) : error ? (
+          <div className="text-destructive text-center mb-4">{error}</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full border rounded bg-card">
+              <thead>
+                <tr className="bg-muted">
+                  <th className="p-2 text-left">Order ID</th>
+                  <th className="p-2 text-left">Customer Name</th>
+                  <th className="p-2 text-left">Phone</th>
+                  <th className="p-2 text-left">Payment</th>
+                  <th className="p-2 text-left">Total (₹)</th>
+                  <th className="p-2 text-left">Created At</th>
+                  <th className="p-2 text-left">Items</th>
+                  <th className="p-2 text-left">Status</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              </thead>
+              <tbody>
+                {orders.map((order) => (
+                  <tr key={order.id} className="border-b last:border-b-0">
+                    <td className="p-2 font-mono">{order.id}</td>
+                    <td className="p-2">{order.customerName}</td>
+                    <td className="p-2">{order.phoneNumber}</td>
+                    <td className="p-2 uppercase">{order.paymentMethod}</td>
+                    <td className="p-2">{order.totalAmount}</td>
+                    <td className="p-2 text-xs">{new Date(order.createdAt).toLocaleString()}</td>
+                    <td className="p-2">
+                      <ul className="list-disc pl-4">
+                        {order.items.map((item, idx) => (
+                          <li key={idx}>
+                            {item.product_name} {item.size ? item.size : ''} × {item.quantity}
+                          </li>
+                        ))}
+                      </ul>
+                    </td>
+                    <td className="p-2 capitalize">
+                      <select
+                        className="border rounded px-2 py-1 bg-background"
+                        value={order.status}
+                        disabled={statusLoading[order.id]}
+                        onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                      >
+                        {statusOptions.map((status) => (
+                          <option key={status} value={status}>{status.charAt(0).toUpperCase() + status.slice(1)}</option>
+                        ))}
+                      </select>
+                      {statusLoading[order.id] && <span className="ml-2 animate-spin">🔄</span>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 } 
