@@ -56,8 +56,11 @@ export default function CartPage() {
     }
     if (!customerInfo.customerPhone.trim()) {
       newErrors.customerPhone = 'Phone number is required.';
-    } else if (!/^\d{10,}$/.test(customerInfo.customerPhone.replace(/\D/g, ''))) {
-      newErrors.customerPhone = 'Phone number must be at least 10 digits.';
+    } else {
+      const phoneNumber = customerInfo.customerPhone.replace(/\D/g, '');
+      if (!/^(\+?91)?[6-9]\d{9}$/.test(phoneNumber)) {
+        newErrors.customerPhone = 'Please enter a valid Indian phone number starting with 6-9 and having 10 digits.';
+      }
     }
     setErrors(newErrors);
     return !newErrors.customerName && !newErrors.customerEmail && !newErrors.customerPhone;

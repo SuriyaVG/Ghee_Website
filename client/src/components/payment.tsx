@@ -138,6 +138,13 @@ export function Payment({ items, total, customerInfo, onSuccess, onCancel }: Pay
     setCodError(null);
     setIsRetrying(false);
     try {
+      // Validate phone number format
+      const phoneNumber = customerInfo.customerPhone.replace(/\D/g, '');
+      const isValidIndianPhone = /^(\+?91)?[6-9]\d{9}$/.test(phoneNumber);
+      if (!isValidIndianPhone) {
+        throw new Error('Please enter a valid Indian phone number starting with 6-9 and having 10 digits.');
+      }
+
       const itemsForOrder = validItems.map(item => ({
         productId: item.variant.id,
         name: item.name,
@@ -146,6 +153,7 @@ export function Payment({ items, total, customerInfo, onSuccess, onCancel }: Pay
       }));
       const orderData = {
         ...customerInfo,
+        customerPhone: phoneNumber.startsWith('91') ? phoneNumber : `91${phoneNumber}`, // Ensure phone number has 91 prefix
         items: itemsForOrder,
         total: total.toString(),
         status: 'pending',
