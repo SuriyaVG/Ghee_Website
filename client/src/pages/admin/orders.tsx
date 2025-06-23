@@ -194,13 +194,11 @@ export default function AdminOrdersPage() {
                     <td className="p-2">{order.totalAmount}</td>
                     <td className="p-2 text-xs">{new Date(order.createdAt).toLocaleString()}</td>
                     <td className="p-2">
-                      <ul className="list-disc pl-4">
+                      <div className="flex flex-col gap-1 bg-muted/50 rounded p-2">
                         {order.items.map((item, idx) => (
-                          <li key={idx}>
-                            {item.product_name} {item.size ? item.size : ''} × {item.quantity}
-                          </li>
+                          <span key={idx}>{item.product_name} {item.size ? item.size : ''} × {item.quantity}</span>
                         ))}
-                      </ul>
+                      </div>
                     </td>
                     <td className="p-2 capitalize">
                       <select
