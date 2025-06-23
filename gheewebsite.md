@@ -75,6 +75,8 @@ GheeRoots is a professional e-commerce website for GSR, a family-owned ghee busi
 - All user input is validated with Zod.
 - Sensitive endpoints require authentication.
 - HTTPS is recommended for production deployments.
+- Admin dashboard navigation buttons (View Orders, Inventory Management) are now hidden unless the admin is logged in, preventing unauthenticated users from seeing or attempting to access admin pages.
+- CORS is now strictly restricted: in production, only the deployed frontend domain (`https://gsrghee-production.up.railway.app`) is allowed; in development, only `http://localhost:5173` is allowed. Wildcard origins are no longer permitted.
 
 ## Roadmap (Updated)
 - [x] Admin Panel for order management (login, view, logout, error handling)
@@ -530,6 +532,7 @@ As of May 29, 2025, the GheeRoots website has been successfully deployed to Rail
 - All sensitive fields are validated and sanitized.
 - Only trusted origins can access the API (CORS).
 - Admin endpoints require a secure token.
+- **CORS Restriction:** CORS policy now only allows requests from the production frontend domain in production, and from localhost:5173 in development. This further secures the API from unauthorized cross-origin requests.
 
 #### Inventory Enforcement
 - Orders now check and decrement stock atomically in a transaction. If any item is out of stock, the order is rejected with a 400 error. The `product_variants` table enforces `stock_quantity >= 0` via a CHECK constraint.

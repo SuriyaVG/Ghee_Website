@@ -30,6 +30,8 @@ const AdminLogin: React.FC = () => {
     }
   };
 
+  const isLoggedIn = typeof window !== 'undefined' && !!localStorage.getItem('admin_access_token');
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f6f2e8' }}>
       <form onSubmit={handleSubmit} style={{ background: '#fff', padding: 32, borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}>
@@ -62,12 +64,16 @@ const AdminLogin: React.FC = () => {
         </button>
       </form>
       <div className="flex flex-col gap-4 mt-8">
-        <Link to="/admin/orders">
-          <button className="w-full py-3 px-6 rounded bg-primary text-white font-bold hover:bg-primary/90 transition">View Orders</button>
-        </Link>
-        <Link to="/admin/inventory">
-          <button className="w-full py-3 px-6 rounded bg-secondary text-primary font-bold hover:bg-secondary/80 transition">Inventory Management</button>
-        </Link>
+        {isLoggedIn && (
+          <>
+            <Link to="/admin/orders">
+              <button className="w-full py-3 px-6 rounded bg-primary text-white font-bold hover:bg-primary/90 transition">View Orders</button>
+            </Link>
+            <Link to="/admin/inventory">
+              <button className="w-full py-3 px-6 rounded bg-secondary text-primary font-bold hover:bg-secondary/80 transition">Inventory Management</button>
+            </Link>
+          </>
+        )}
       </div>
     </div>
   );

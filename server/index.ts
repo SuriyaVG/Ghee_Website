@@ -42,30 +42,10 @@ app.use((req, res, next) => {
 // --- End Security Middleware ---
 
 // --- CORS Configuration ---
-const allowedOrigins = [
-  'http://localhost:5000', // Vite dev server (often proxies to itself or backend port)
-  'http://127.0.0.1:5000',
-  'http://localhost:5173', // Vite frontend dev server
-  'https://gsrghee-production.up.railway.app', // Your production frontend URL
-  'https://gsrghee-production.up.railway.app;' // Handle origin with semicolon
-];
-
-console.log('ADMIN_API_TOKEN:', process.env.ADMIN_API_TOKEN);
-
-const corsOptions: cors.CorsOptions = {
-  origin: (origin, callback) => {
-    // Clean up origin by removing any trailing semicolon
-    const cleanOrigin = origin?.replace(/;$/, '');
-    if (!origin || allowedOrigins.includes(cleanOrigin || '') || allowedOrigins.includes(origin || '')) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true, // Important for cookies, authorization headers with HTTPS
-};
-
-app.use(cors(corsOptions));
+const allowed = process.env.NODE_ENV === 'production'
+  ? 'https://gsrghee-production.up.railway.app'
+  : 'http://localhost:5173';
+app.use(cors({ origin: allowed, credentials: true }));
 // --- End CORS Configuration ---
 
 // Add pino-http middleware for request logging
