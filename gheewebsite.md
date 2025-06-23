@@ -111,7 +111,7 @@ GheeRoots is a professional e-commerce website for GSR, a family-owned ghee busi
 | image_url         | text     | **Now uses local images (e.g., /images/ghee-250ml.jpg)** |
 | best_value_badge  | text     | Optional badge (e.g., Best Value)           |
 | sku               | text     | Optional SKU                                |
-| stock_quantity    | integer  | Inventory count                             |
+| stock_quantity    | integer  | Inventory count (**CHECK: >= 0, decremented on order**) |
 
 ### orders
 | Field            | Type     | Description                                 |
@@ -119,7 +119,7 @@ GheeRoots is a professional e-commerce website for GSR, a family-owned ghee busi
 | id               | serial   | Primary key                                 |
 | customerName     | text     | Customer name                               |
 | customerEmail    | text     | Customer email                              |
-| customerPhone    | text     | Customer phone                              |
+| customerPhone    | text     | Customer phone (must match Indian phone format: ^(\+91|91)?[6-9]\d{9}$, validated client-side and DB) |
 | total            | decimal  | Order total                                 |
 | status           | text     | Order status                                |
 | paymentId        | text     | Payment ID                                  |
@@ -178,6 +178,10 @@ GheeRoots is a professional e-commerce website for GSR, a family-owned ghee busi
 ### 5. **Admin Orders Page Infinite Fetch Loop**
 - **Cause**: The useEffect hook in `client/src/pages/admin/orders.tsx` included function references (`logout`, `navigate`) in its dependency array, causing the effect to re-run on every render and resulting in an infinite fetch loop.
 - **Resolution**: The dependency array was updated to only include `[isLoggedIn, token, authLoading]`, which are stable values. This prevents unnecessary re-renders and fetches, resolving the infinite loop.
+
+### 6. **Cash on Delivery (COD) 500 Error**
+- **Cause**: Phone numbers not matching strict Indian format required by DB constraint.
+- **Resolution**: Client-side validation now ensures phone numbers start with 6-9 and are 10 digits (optionally +91/91). Backend CORS also fixed to handle trailing semicolons in Origin header.
 
 ---
 
@@ -526,6 +530,9 @@ As of May 29, 2025, the GheeRoots website has been successfully deployed to Rail
 - All sensitive fields are validated and sanitized.
 - Only trusted origins can access the API (CORS).
 - Admin endpoints require a secure token.
+
+#### Inventory Enforcement
+- Orders now check and decrement stock atomically in a transaction. If any item is out of stock, the order is rejected with a 400 error. The `product_variants` table enforces `stock_quantity >= 0` via a CHECK constraint.
 
 ## Final Bug Fixes & Stability Improvements (June 2024)
 

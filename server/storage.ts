@@ -18,7 +18,7 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import pkg from 'pg';
 const { Pool } = pkg;
 import { orderItems, InsertOrderItem, OrderItem } from '@shared/schemas/orders';
-import { eq, inArray, relations } from 'drizzle-orm';
+import { eq, inArray, relations, and, sql } from 'drizzle-orm';
 import * as schema from '@shared/schema';
 import { users } from '@shared/schemas';
 
@@ -42,6 +42,9 @@ export interface IStorage {
 
   // Users
   getUserByEmail(email: string): Promise<{ id: number; email: string; passwordHash: string } | undefined>;
+
+  // New method
+  updateVariantStock(variantId: number, stock_quantity: number): Promise<ProductVariant | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -144,6 +147,25 @@ export class MemStorage implements IStorage {
   async createOrder(insertOrder: InsertOrder & { items?: any[] }): Promise<Order & { items?: any[] }> {
     const id = this.currentOrderId++;
     const { items, ...orderData } = insertOrder;
+    // 1. Check stock for all items
+    if (items) {
+      for (const item of items) {
+        const variant = this.productVariants.get(item.productId);
+        if (!variant || (variant.stock_quantity ?? 0) < item.quantity) {
+          const err: any = new Error(`Insufficient stock for product variant: ${item.productId}`);
+          err.status = 400;
+          throw err;
+        }
+      }
+      // 2. Decrement stock for all items
+      for (const item of items) {
+        const variant = this.productVariants.get(item.productId);
+        if (variant) {
+          variant.stock_quantity = (variant.stock_quantity ?? 0) - item.quantity;
+          this.productVariants.set(item.productId, variant);
+        }
+      }
+    }
     const order: Order = {
       id,
       createdAt: new Date(),
@@ -230,6 +252,14 @@ export class MemStorage implements IStorage {
     // Not implemented for in-memory
     return undefined;
   }
+
+  async updateVariantStock(variantId: number, stock_quantity: number): Promise<ProductVariant | undefined> {
+    const variant = this.productVariants.get(variantId);
+    if (!variant) return undefined;
+    variant.stock_quantity = stock_quantity;
+    this.productVariants.set(variantId, variant);
+    return variant;
+  }
 }
 
 export class PgStorage implements IStorage {
@@ -257,38 +287,45 @@ export class PgStorage implements IStorage {
   // Orders
   async createOrder(order: InsertOrder & { items: any[] }): Promise<Order & { items?: any[] }> {
     const { items, ...orderData } = order;
-
-    const newOrder = await db
-      .insert(orders)
-      .values(orderData)
-      .returning();
-
-    const orderItemsData = await Promise.all(items.map(async (item) => {
-      // Defensively remove any size suffix from the incoming name
-      const baseName = item.name.replace(/\s+\d+ml$/i, '').trim();
-      
-      const variant = await db.query.productVariants.findFirst({
-        where: eq(productVariants.id, item.productId),
-      });
-
-      // Use the fetched variant's size to construct the definitive product name
-      const productName = variant ? `${baseName} ${variant.size}` : baseName;
-      
-      return {
-        order_id: newOrder[0].id,
-        product_id: item.productId,
-        product_name: productName,
-        quantity: item.quantity,
-        price_per_item: item.price.toString(),
-      };
-    }));
-
-    const newOrderItems = await db
-      .insert(orderItems)
-      .values(orderItemsData)
-      .returning();
-
-    return { ...newOrder[0], items: newOrderItems.map(item => ({...item, price_per_item: item.price_per_item ?? ''})) };
+    // Use a transaction for stock check, decrement, and order creation
+    return await db.transaction(async (trx) => {
+      // 1. Check stock for all items
+      for (const item of items) {
+        const variant = await trx.query.productVariants.findFirst({
+          where: eq(productVariants.id, item.productId),
+        });
+        if (!variant || (variant.stock_quantity ?? 0) < item.quantity) {
+          const err: any = new Error(`Insufficient stock for product variant: ${item.productId}`);
+          err.status = 400;
+          throw err;
+        }
+      }
+      // 2. Decrement stock for all items
+      for (const item of items) {
+        await trx.update(productVariants)
+          .set({ stock_quantity: sql`${productVariants.stock_quantity} - ${item.quantity}` })
+          .where(and(eq(productVariants.id, item.productId), sql`${productVariants.stock_quantity} >= ${item.quantity}`));
+      }
+      // 3. Create the order
+      const newOrder = await trx.insert(orders).values(orderData).returning();
+      // 4. Create order items
+      const orderItemsData = await Promise.all(items.map(async (item) => {
+        const baseName = item.name.replace(/\s+\d+ml$/i, '').trim();
+        const variant = await trx.query.productVariants.findFirst({
+          where: eq(productVariants.id, item.productId),
+        });
+        const productName = variant ? `${baseName} ${String(variant.size ?? '')}` : baseName;
+        return {
+          order_id: newOrder[0].id,
+          product_id: item.productId,
+          product_name: productName,
+          quantity: item.quantity,
+          price_per_item: item.price.toString(),
+        };
+      }));
+      const newOrderItems = await trx.insert(orderItems).values(orderItemsData).returning();
+      return { ...newOrder[0], items: newOrderItems.map(item => ({...item, price_per_item: item.price_per_item ?? ''})) };
+    });
   }
 
   async getOrder(id: number): Promise<(Order & { items?: any[] }) | undefined> {
@@ -362,6 +399,14 @@ export class PgStorage implements IStorage {
     const user = await db.query.users.findFirst({ where: eq(users.email, email) });
     if (!user) return undefined;
     return { id: user.id, email: user.email, passwordHash: user.passwordHash };
+  }
+
+  async updateVariantStock(variantId: number, stock_quantity: number): Promise<ProductVariant | undefined> {
+    const [updated] = await db.update(productVariants)
+      .set({ stock_quantity })
+      .where(eq(productVariants.id, variantId))
+      .returning();
+    return updated;
   }
 }
 

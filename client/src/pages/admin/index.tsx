@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const AdminLogin: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -61,6 +61,14 @@ const AdminLogin: React.FC = () => {
           {loading ? 'Logging in...' : 'Login'}
         </button>
       </form>
+      <div className="flex flex-col gap-4 mt-8">
+        <Link to="/admin/orders">
+          <button className="w-full py-3 px-6 rounded bg-primary text-white font-bold hover:bg-primary/90 transition">View Orders</button>
+        </Link>
+        <Link to="/admin/inventory">
+          <button className="w-full py-3 px-6 rounded bg-secondary text-primary font-bold hover:bg-secondary/80 transition">Inventory Management</button>
+        </Link>
+      </div>
     </div>
   );
 };

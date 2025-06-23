@@ -6,6 +6,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import AdminLogin from './pages/admin/index';
 import AdminOrders from './pages/admin/orders';
+import AdminInventoryPage from './pages/admin/inventory';
 
 // Lazy-loaded pages for code-splitting
 const Home = lazy(() => import('./pages/home'));
@@ -26,6 +27,7 @@ function App() {
               <Route path="/payment-success" element={<PaymentSuccessPage />} />
               <Route path="/admin" element={<AdminLogin />} />
               <Route path="/admin/orders" element={<AdminOrders />} />
+              <Route path="/admin/inventory" element={<AdminInventoryPage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

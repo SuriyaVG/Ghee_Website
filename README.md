@@ -11,6 +11,8 @@ GheeRoots is a professional, full-stack e-commerce website built for a family-ow
 - **Secure Admin Panel**: JWT-based authentication for admin area to view and manage all customer orders.
 - **Modern Frontend**: A responsive and interactive UI built with React, Vite, and Tailwind CSS.
 - **Comprehensive Testing**: Includes unit and API tests to ensure backend reliability.
+- **Cash on Delivery (COD) Validation**: Phone numbers are now validated on the client to match Indian mobile formats (starts with 6-9, 10 digits, optional +91/91), preventing order failures due to DB constraints.
+- **CORS Robustness**: The backend now handles minor Origin header formatting issues (e.g., trailing semicolons) for production deployments.
 
 ## Tech Stack
 
@@ -98,6 +100,8 @@ This project requires two terminals to run both the frontend and backend servers
 - **Unexpected end of JSON input**: Fixed by ensuring backend `/api/auth/login` always returns a JSON response, even for errors.
 - **404 on /auth/login**: Fixed by mounting `/api/auth` directly on the main Express app and updating all fetch calls to use `/api/auth/login`.
 - **Admin orders page stuck on loading**: Fixed by ensuring the JWT token key was consistent (`admin_access_token`) across login, storage, and API calls.
+- **500 error on order placement (COD)**: Ensure the phone number is a valid Indian mobile (starts with 6-9, 10 digits, with or without +91/91). The client and DB both enforce this format.
+- **CORS error with production domain**: The backend now strips trailing semicolons from the Origin header to avoid CORS failures.
 
 ## Documentation
 For detailed architectural and feature documentation, refer to [gheewebsite.md](gheewebsite.md).

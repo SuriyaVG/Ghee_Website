@@ -1,18 +1,45 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import axios from 'axios';
 import { storage } from '../storage';
+import { validateRequest } from '../middleware/validateRequest';
+import { z } from 'zod';
+import { insertOrderSchema } from '@shared/schemas/orders';
 
 const router = Router();
 
+// Zod schema for /create-cashfree-order
+const createCashfreeOrderSchema = z.object({
+  amount: z.number().positive(),
+  currency: z.string().default('INR'),
+  customerInfo: z.object({
+    customerName: z.string().min(1),
+    customerEmail: z.string().email(),
+    customerPhone: z.string().min(10),
+  }),
+});
+
+// Zod schema for /verify-cashfree-payment
+const verifyCashfreePaymentSchema = z.object({
+  cashfreeOrderId: z.string().min(1),
+  cfPaymentId: z.string().optional(),
+  customerInfo: z.object({
+    customerName: z.string().min(1),
+    customerEmail: z.string().email(),
+    customerPhone: z.string().min(10),
+  }),
+  items: z.array(z.object({
+    productId: z.number().optional(),
+    name: z.string(),
+    quantity: z.number(),
+    price: z.string().or(z.number()),
+  })).min(1),
+  total: z.string().or(z.number()),
+});
+
 // Create a Cashfree order
-router.post('/create-cashfree-order', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/create-cashfree-order', validateRequest(createCashfreeOrderSchema), async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { amount, currency = 'INR', customerInfo } = req.body;
-    if (!amount || !customerInfo || !customerInfo.customerName || !customerInfo.customerEmail || !customerInfo.customerPhone) {
-      const err: any = new Error('Missing amount or customer information for Cashfree order.');
-      err.statusCode = 400;
-      return next(err);
-    }
     const cashfreeConfig = {
       appId: process.env.CASHFREE_APP_ID!,
       secretKey: process.env.CASHFREE_SECRET_KEY!,
@@ -59,14 +86,9 @@ router.post('/create-cashfree-order', async (req: Request, res: Response, next: 
 });
 
 // Verify Cashfree payment and create DB order
-router.post('/verify-cashfree-payment', async (req: Request, res: Response, next: NextFunction) => {
+router.post('/verify-cashfree-payment', validateRequest(verifyCashfreePaymentSchema), async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { cashfreeOrderId, cfPaymentId, customerInfo, items, total } = req.body;
-    if (!cashfreeOrderId || !customerInfo || !items || total === undefined) {
-      const err: any = new Error('Missing required fields for verification.');
-      err.statusCode = 400;
-      return next(err);
-    }
     const cashfreeConfig = {
       appId: process.env.CASHFREE_APP_ID!,
       secretKey: process.env.CASHFREE_SECRET_KEY!,
@@ -93,7 +115,7 @@ router.post('/verify-cashfree-payment', async (req: Request, res: Response, next
       customerName: customerInfo.customerName,
       customerEmail: customerInfo.customerEmail,
       customerPhone: customerInfo.customerPhone,
-      items: JSON.stringify(items),
+      items,
       total: total.toString(),
       status: 'paid',
       paymentId: cfOrderData.cf_order_id,
