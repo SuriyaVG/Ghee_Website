@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useLocation, Link } from 'wouter';
+import { useLocation, Link } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useCartStore } from '@/lib/store';
@@ -19,7 +19,7 @@ interface TemporaryOrderData {
 }
 
 export default function PaymentSuccessPage() {
-  const [, navigate] = useLocation();
+  const location = useLocation();
   const { toast } = useToast();
   const clearCart = useCartStore((state) => state.clearCart);
   const [order, setOrder] = useState<any>(null);
@@ -159,7 +159,7 @@ export default function PaymentSuccessPage() {
         <h1 className="text-2xl font-bold mb-2">Unable to fetch order</h1>
         <p className="text-muted-foreground mb-6">{fetchError}</p>
         <Button asChild>
-          <Link href="/">Go to Homepage</Link>
+          <Link to="/">Go to Homepage</Link>
         </Button>
       </div>
     );
@@ -180,7 +180,7 @@ export default function PaymentSuccessPage() {
         </p>
         <div className="space-x-4">
           <Button asChild>
-            <Link href="/">Continue Shopping</Link>
+            <Link to="/">Continue Shopping</Link>
           </Button>
         </div>
       </div>
@@ -211,7 +211,7 @@ export default function PaymentSuccessPage() {
           Order ID: {getQueryParam('cf_order_id') || 'N/A'}).
         </p>
         <Button asChild>
-          <Link href="/">Go to Homepage</Link>
+          <Link to="/">Go to Homepage</Link>
         </Button>
       </div>
     );
@@ -228,7 +228,7 @@ export default function PaymentSuccessPage() {
         </p>
         <div className="space-x-4">
           <Button asChild>
-            <Link href="/">Continue Shopping</Link>
+            <Link to="/">Continue Shopping</Link>
           </Button>
         </div>
       </div>

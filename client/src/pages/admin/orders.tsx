@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useLocation, Link } from 'wouter';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAdminAuth } from '@/lib/useAdminAuth';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { saveAs } from 'file-saver';
 import { useMutation } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
 
 interface Order {
   id: number;
@@ -43,7 +42,6 @@ function AdminNavBar() {
 
 export default function AdminOrdersPage() {
   const { isLoggedIn, token, logout, loading: authLoading } = useAdminAuth();
-  const [, navigate] = useLocation();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -80,7 +78,7 @@ export default function AdminOrdersPage() {
   useEffect(() => {
     if (authLoading) return; // Wait for auth to load
     if (!isLoggedIn) {
-      navigate('/admin');
+      navigateRouter('/admin');
       return;
     }
     setLoading(true);
@@ -93,7 +91,7 @@ export default function AdminOrdersPage() {
       .then(async (res) => {
         if (res.status === 401) {
           logout();
-          navigate('/admin');
+          navigateRouter('/admin');
           return;
         }
         if (!res.ok) {
@@ -110,7 +108,7 @@ export default function AdminOrdersPage() {
 
   const handleLogout = () => {
     logout();
-    navigate('/admin');
+    navigateRouter('/admin');
   };
 
   const handleStatusChange = async (orderId: number, newStatus: string) => {
