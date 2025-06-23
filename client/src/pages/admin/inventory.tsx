@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import type { ProductWithVariants, ProductVariant } from '@shared/schema';
 import { useNavigate, Link } from 'react-router-dom';
+import AdminLayout from '@/components/admin/AdminLayout';
 
 function AdminNavBar() {
   const navigate = useNavigate();
@@ -59,8 +60,7 @@ export default function AdminInventoryPage() {
   if (isLoading) return <div className="p-8">Loading inventory...</div>;
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
-      <AdminNavBar />
+    <AdminLayout>
       <h1 className="text-3xl font-bold mb-6">Inventory Management</h1>
       <table className="min-w-full border rounded bg-card">
         <thead>
@@ -110,6 +110,6 @@ export default function AdminInventoryPage() {
           )}
         </tbody>
       </table>
-    </div>
+    </AdminLayout>
   );
 } 

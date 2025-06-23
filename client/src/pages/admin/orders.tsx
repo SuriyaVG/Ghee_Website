@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { saveAs } from 'file-saver';
 import { useMutation } from '@tanstack/react-query';
+import AdminLayout from '@/components/admin/AdminLayout';
 
 interface Order {
   id: number;
@@ -152,8 +153,8 @@ export default function AdminOrdersPage() {
   }
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
-      <AdminNavBar />
+    <AdminLayout>
+      <h1 className="text-3xl font-bold mb-6">Orders</h1>
       <div className="min-h-screen bg-background p-4">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Admin Orders</h1>
@@ -221,6 +222,6 @@ export default function AdminOrdersPage() {
           </div>
         )}
       </div>
-    </div>
+    </AdminLayout>
   );
 } 
