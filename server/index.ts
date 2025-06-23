@@ -83,6 +83,8 @@ async function setupApp(appInstance: ExpressAppType) {
   app.use('/auth/refresh-token', csurf({ cookie: true }));
   // Centralized Error Handling (must be after routes)
   appInstance.use((err: any, req: Request, res: Response, _next: NextFunction) => {
+    // Explicit error logging for debugging
+    console.error('Server Error:', err);
     const errorLogger = req.log || logger;
     errorLogger.error(
       {
