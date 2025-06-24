@@ -6,6 +6,7 @@ import { useCartStore } from '@/lib/store';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { supabase } from '@/lib/supabaseClient';
 
 const getQueryParam = (param: string) => {
   const urlParams = new URLSearchParams(window.location.search);
@@ -82,9 +83,12 @@ export default function PaymentSuccessPage() {
         setIsFetching(true);
         setFetchError(null);
         try {
-          const response = await apiRequest('GET', `/api/orders/${orderId}`);
-          if (!response.ok) throw new Error('Order not found');
-          const data = await response.json();
+          const { data, error } = await supabase
+            .from('orders')
+            .select('*')
+            .eq('id', orderId)
+            .single();
+          if (error || !data) throw new Error('Order not found');
           setOrder(data);
           setIsFetching(false);
         } catch (err: any) {

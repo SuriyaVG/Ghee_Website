@@ -627,3 +627,113 @@ After deploying the production-ready schema, a few persistent bugs were identifi
 - Always check the Network tab and backend logs for debugging API issues.
 
 ---
+
+## Architecture Overview
+
+- **Frontend**: Next.js (React) deployed on Vercel, fetches data directly from Supabase Postgres using `@supabase/supabase-js`.
+- **Backend**: All business logic and secure endpoints are implemented as Supabase Edge Functions (Deno runtime).
+- **Database**: Supabase Postgres, with all tables using UUIDs for primary and foreign keys.
+
+---
+
+## Database Schema (Current, All UUIDs)
+
+### products
+| Field       | Type     | Description                                 |
+|-------------|----------|---------------------------------------------|
+| id          | uuid     | Primary key (default uuid_generate_v4())    |
+| name        | text     | Product name                                |
+| description | text     | Product description                         |
+| is_popular  | boolean  | Whether the product is popular              |
+| created_at  | timestamptz | Created timestamp                        |
+| updated_at  | timestamptz | Updated timestamp                        |
+
+### product_variants
+| Field             | Type     | Description                                 |
+|-------------------|----------|---------------------------------------------|
+| id                | uuid     | Primary key                                 |
+| product_id        | uuid     | Foreign key to products                     |
+| size              | text     | Variant size (e.g., 250ml, 500ml, 1000ml)   |
+| price             | decimal  | Price for this variant                      |
+| image_url         | text     | Local image path (e.g., /images/ghee-250ml.jpg) |
+| best_value_badge  | text     | Optional badge (e.g., Best Value)           |
+| sku               | text     | Optional SKU                                |
+| stock_quantity    | integer  | Inventory count                             |
+
+### orders
+| Field            | Type     | Description                                 |
+|------------------|----------|---------------------------------------------|
+| id               | uuid     | Primary key                                 |
+| customer_name    | text     | Customer name                               |
+| customer_email   | text     | Customer email                              |
+| customer_phone   | text     | Customer phone                              |
+| total            | decimal  | Order total                                 |
+| status           | text     | Order status                                |
+| payment_id       | text     | Payment ID                                  |
+| payment_status   | text     | Payment status                              |
+| created_at       | timestamptz | Order creation time                       |
+
+### order_items
+| Field             | Type     | Description                                 |
+|-------------------|----------|---------------------------------------------|
+| id                | uuid     | Primary key                                 |
+| order_id          | uuid     | Foreign key to orders (CASCADE delete)      |
+| product_id        | uuid     | Foreign key to products                     |
+| product_name      | text     | Product name at time of order               |
+| quantity          | integer  | Quantity ordered                            |
+| price_per_item    | decimal  | Price per item at time of order             |
+
+### contacts
+| Field        | Type     | Description                                 |
+|--------------|----------|---------------------------------------------|
+| id           | uuid     | Primary key                                 |
+| first_name   | text     | First name                                  |
+| last_name    | text     | Last name                                   |
+| email        | text     | Email address                               |
+| phone        | text     | Phone number                                |
+| message      | text     | Message content                             |
+| created_at   | timestamptz | Contact creation time                      |
+
+---
+
+## Environment Variables
+
+### Frontend (Vercel)
+- `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase project URL (e.g., https://xyzcompany.supabase.co)
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase public anon key
+
+### Backend (Supabase Edge Functions)
+- `SUPABASE_URL`: Your Supabase project URL
+- `SUPABASE_ANON_KEY`: Your Supabase anon key (use service_role only in secure server-side code, never in frontend)
+
+---
+
+## Deployment Instructions
+
+### Frontend (Vercel)
+1. Push your Next.js app to GitHub.
+2. Import the repo in Vercel.
+3. Set environment variables in Vercel dashboard as above.
+4. Deploy.
+
+### Backend (Supabase Edge Functions)
+1. Write Edge Functions in the `supabase/functions/` directory.
+2. Deploy using the Supabase CLI: `supabase functions deploy <function-name>`
+3. Set environment variables in Supabase project settings.
+
+---
+
+## Migration Notes
+- All legacy Express.js/Node.js code has been removed.
+- All API calls now use the Supabase client directly from the frontend or via Edge Functions.
+- Database schema and migrations are tracked in `/migrations` and documented here.
+
+---
+
+## End-to-End Testing Plan
+- Visit homepage: Confirm product listing loads from Supabase.
+- Place an order: Add items to cart, checkout, and verify order is created in Supabase DB.
+- Admin: Login, view orders, update status, and verify changes in Supabase.
+- Environment: Test all flows both locally and in deployed environments (Vercel, Supabase).
+
+---

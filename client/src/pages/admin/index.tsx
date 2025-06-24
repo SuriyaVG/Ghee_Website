@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { supabase } from '@/lib/supabaseClient';
 
 const AdminLogin: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -13,15 +14,12 @@ const AdminLogin: React.FC = () => {
     setError('');
     setLoading(true);
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-        credentials: 'include',
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Login failed');
-      localStorage.setItem('admin_access_token', data.accessToken);
+      if (error || !data.session) throw new Error(error?.message || 'Login failed');
+      localStorage.setItem('admin_access_token', data.session.access_token);
       navigate('/admin/orders');
     } catch (err: any) {
       setError(err.message || 'Login failed');

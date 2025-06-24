@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import type { ProductWithVariants, ProductVariant } from '@shared/schema';
 import { useNavigate, Link } from 'react-router-dom';
 import AdminLayout from '@/components/admin/AdminLayout';
+import { supabase } from '@/lib/supabaseClient';
 
 function AdminNavBar() {
   const navigate = useNavigate();
@@ -27,30 +28,36 @@ export default function AdminInventoryPage() {
   useAdminAuth(); // Redirects if not admin
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { data: products, isLoading } = useQuery<ProductWithVariants[]>({
-    queryKey: ['/api/products'],
+  const { data: products, isLoading, refetch } = useQuery<ProductWithVariants[]>({
+    queryKey: ['products-with-variants'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*, product_variants(*)');
+      if (error) throw new Error(error.message);
+      // Transform data to match ProductWithVariants[]
+      return (data || []).map((product: any) => ({
+        ...product,
+        variants: product.product_variants || [],
+      }));
+    },
   });
   const [editStock, setEditStock] = useState<Record<number, number>>({});
 
   const updateStockMutation = useMutation({
     mutationFn: async ({ productId, variantId, stock_quantity }: { productId: number; variantId: number; stock_quantity: number }) => {
-      const res = await fetch(`/api/products/${productId}/variant/${variantId}/stock`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('admin_access_token')}`,
-        },
-        body: JSON.stringify({ stock_quantity }),
-      });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || 'Failed to update stock');
+      const { error } = await supabase
+        .from('product_variants')
+        .update({ stock_quantity })
+        .eq('id', variantId);
+      if (error) {
+        throw new Error(error.message || 'Failed to update stock');
       }
-      return res.json();
+      return { productId, variantId, stock_quantity };
     },
     onSuccess: () => {
       toast({ title: 'Stock updated', description: 'Inventory updated successfully.' });
-      queryClient.invalidateQueries(['/api/products']);
+      refetch();
     },
     onError: (err: any) => {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
